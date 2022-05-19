@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="style.css" />
-        <title>Document</title>
+        <title>ToDo List</title>
     </head>
     <body>
         <div class="overall-container">
@@ -13,20 +13,28 @@
                 <h1>To Do</h1>
                 <button class="action-btn">+ Create New Task</button>
                 <div>
+                    <p>Home</p>
+                </div>
+                <div>
                     <p>Inbox</p>
                 </div>
             </div>
             <div class="content-container">
-                <div class="card">
-                    <h3>Today:</h2>
-                    <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Vel nam esse distinctio rerum recusandae animi
-                        voluptatem ullam, exercitationem expedita magnam error
-                        iure excepturi quis quasi temporibus, iste, autem
-                        perferendis illo.
-                    </p>
+                <div id="today-card" class="card">
+                    <h3>Today:</h3>
+                    <div class="task">
+                        <div>Comp Sci Assignment</div>
+                        <input type="date" />
+                    </div>
                 </div>
+                <div class="card">
+                    <h3>Upcoming:</h3>
+                    <div class="task">
+                        <div>Comp Sci Assignment</div>
+                        <input id="date" type="date" />
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
         <script src="main.js"></script>
