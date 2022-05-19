@@ -10,6 +10,10 @@ html, body {
     box-sizing: border-box;
 }
 
+h3 {
+    
+}
+
 .overall-container {
     display: flex;
 }
@@ -24,6 +28,9 @@ html, body {
 }
 
 .content-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
     padding: 3em;
 }
 
@@ -36,6 +43,14 @@ html, body {
     box-shadow: 0 0 5px rgb(146, 146, 146);
 }
 
+.task {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid rgb(146, 146, 146);
+    border-radius: .5em;
+    padding: .2em;
+}
+
 .action-btn {
     font-weight: bold;
     padding: .5em 2em;
@@ -45,5 +60,6 @@ html, body {
 }
 
 .action-btn:hover {
-    background-color: rgb(30, 83, 243);
+    background-color: rgb(50, 86, 196);
 }
+
