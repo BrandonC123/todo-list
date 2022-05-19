@@ -1,0 +1,1 @@
+(()=>{const t=document.getElementById("today-card");document.querySelector(".action-btn").addEventListener("click",(function(){const e=document.createElement("div");e.classList.add("task");const n=document.createElement("div");n.textContent="dummy text";const d=document.createElement("input");d.type="date",e.appendChild(n),e.appendChild(d),t.appendChild(e)}))})();
