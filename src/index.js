@@ -21,15 +21,17 @@ const task = (title, description, dueDate, priority) => {
 
 const elementHandler = (() => {
     let tasks = [];
+    let taskCount = 0;
     function getTaskValues(id) {
-        tasks.push(id);
-        console.log(document.getElementById("calendar-" + id).value);
-        document.getElementById("task-actions-" + id).classList.add("hide")
+        console.log(document.getElementById("task-" + id));
+        console.log(document.getElementById("task-title-" + id).value);
+        document.getElementById("task-actions-" + id).classList.add("hide");
         // create task with construct, add to array
     }
     return {
         getTaskValues,
         tasks,
+        taskCount,
     };
 })();
 
@@ -37,20 +39,21 @@ const elementCreation = (() => {
     const todayCont = document.getElementById("today-container");
 
     function createTask() {
-        const taskId = elementHandler.tasks.length + 1;
+        elementHandler.taskCount++;
+        const taskId = elementHandler.taskCount;
         const task = document.createElement("div");
         task.setAttribute("id", "task-" + taskId);
         task.classList.add("task");
 
         const taskTitle = document.createElement("input");
-        taskTitle.setAttribute("id", "taskTitle-" + taskId);
+        taskTitle.setAttribute("id", "task-title-" + taskId);
         taskTitle.type = "text";
-        taskTitle.value = "dummy text";
+        taskTitle.placeholder = "Title";
 
         const calendar = document.createElement("input");
         calendar.setAttribute("id", "calendar-" + taskId);
         calendar.type = "date";
-        calendar.value = "2022-05-03"
+        calendar.value = "2022-05-03";
 
         const taskActions = document.createElement("div");
         taskActions.setAttribute("id", "task-actions-" + taskId);
@@ -70,14 +73,12 @@ const elementCreation = (() => {
         task.appendChild(calendar);
         task.appendChild(taskActions);
         todayCont.appendChild(task);
-        // elementHandler.getTaskValues(taskId);
+        console.log(taskId);
         checkBtn.addEventListener("click", function () {
             elementHandler.getTaskValues(taskId);
         });
     }
-    function toggleEdit(id) {
-
-    }
+    function toggleEdit(id) {}
     document.querySelector("#today-btn").addEventListener("click", createTask);
     return {
         createTask,
