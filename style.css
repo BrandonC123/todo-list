@@ -45,6 +45,7 @@ input[type="text"],
 .popup {
     position: fixed;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 1;
@@ -57,6 +58,16 @@ input[type="text"],
     background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 }
 
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    border: 3px solid royalblue;   
+    padding: 0 .5em;
+    color: royalblue;
+}
+
 .popup-task {
     display: flex;
     flex-direction: column;
@@ -64,7 +75,8 @@ input[type="text"],
     max-width: 700px;
     background-color: white;
     border: 1px solid rgb(146, 146, 146);
-    border-radius: 0.5em;
+    border-bottom-left-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
     padding: 3em;
 }
 
@@ -80,7 +92,6 @@ input[type="text"],
 
 .task {
     display: flex;
-    flex-direction: column;
     margin-bottom: 8px;
     max-width: 700px;
     background-color: white;

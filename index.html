@@ -11,7 +11,9 @@
         <div class="overall-container">
             <div class="sidebar">
                 <h1>To Do</h1>
-                <button id="create-btn" class="action-btn">+ Create New Task</button>
+                <button id="create-btn" class="action-btn">
+                    + Create New Task
+                </button>
                 <div>
                     <p>Home</p>
                 </div>
@@ -19,23 +21,49 @@
                     <p>Inbox</p>
                 </div>
                 <div>
+                    <p>All ToDos</p>
+                </div>
+                <div>
                     <p>Projects</p>
                     <div class="project-container"></div>
                 </div>
             </div>
             <div class="popup hide">
-                <div class="popup-task">
-                    <div class="top-task">
-                        <input
-                            readonly
-                            type="text"
-                            value="Comp Sci Assignment"
-                        />
-                        <input type="date" />
+                <div class="popup-container">
+                    <div class="popup-header">
+                        <h3>Create New Task</h3>
+                        <button type="button" class="x-btn">X</button>
                     </div>
-                    <textarea placeholder="Details"></textarea>
-                    <button class="check-btn">✔</button>
-                    <button class="x-btn">X</button>
+                    <div class="popup-task">
+                        <form>
+                            <div class="top-task">
+                                <input
+                                    id="popup-title"
+                       
+                                    type="text"
+                                    value="Comp Sci Assignment"
+                                />
+                                <input id="popup-date" type="date" />
+                            </div>
+                            <textarea
+                                id="popup-descr"
+                                placeholder="Description"
+                            ></textarea>
+                            <select id="popup-priority">
+                                <option value="">--Priority Level--</option>
+                                <option value="low">Low</option>
+                                <option value="med">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                            <button
+                                id="create-btn1"
+                                type="button"
+                                class="secondary-btn"
+                            >
+                                Create
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div class="content-container">
@@ -44,23 +72,17 @@
                         <h3>Today:</h3>
                         <div id="today-container">
                             <div class="task">
-                                <div class="top-task">
-                                    <input
-                                        readonly
-                                        type="text"
-                                        value="Comp Sci Assignment"
-                                    />
-                                    <input type="date" />
-                                    <div class="task-actions">
-                                        <button class="check-btn">✔</button>
-                                        <button class="x-btn">X</button>
-                                    </div>
-                                </div>
-                                <textarea placeholder="Details"></textarea>
+                                <input
+                                    readonly
+                                    type="text"
+                                    value="Comp Sci Assignment"
+                                />
+                                <input type="date" />
                             </div>
                         </div>
+
                         <button id="today-btn" class="secondary-btn">
-                            Add +
+                            Quick Add +
                         </button>
                     </div>
                     <div class="card">
