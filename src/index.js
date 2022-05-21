@@ -20,17 +20,32 @@ const task = (title, description, dueDate, priority) => {
 };
 
 const elementHandler = (() => {
-    let tasks = [];
+    let taskList = [];
     let taskCount = 0;
-    function getTaskValues(id) {
-        console.log(document.getElementById("task-" + id));
-        console.log(document.getElementById("task-title-" + id).value);
-        document.getElementById("task-actions-" + id).classList.add("hide");
+    function createTask(id) {
+        const title = document.getElementById("popup-title").value;
+        const description = document.getElementById("popup-descr").value;
+        const date = document.getElementById("popup-date").value;
+        const priority = document.getElementById("popup-priority").value;
+        console.log(title);
+        console.log(date);
+        console.log(description);
+        console.log(priority);
+        const newTask = task(title, description, date, priority);
+        taskList.push(newTask);
+        console.log(taskList[0].getDueDate());
+        elementCreation.togglePopUp();
+        localStorage.setItem("task-list", description);
         // create task with construct, add to array
     }
+    try {
+        console.log(localStorage.getItem("task-list") + " local storage");
+    } catch (e) {
+        console.log("empty");
+    }
     return {
-        getTaskValues,
-        tasks,
+        createTask,
+        taskList,
         taskCount,
     };
 })();
@@ -53,7 +68,7 @@ const elementCreation = (() => {
         const calendar = document.createElement("input");
         calendar.setAttribute("id", "calendar-" + taskId);
         calendar.type = "date";
-        calendar.value = "2022-05-03";
+        calendar = "2022-05-03";
 
         const taskActions = document.createElement("div");
         taskActions.setAttribute("id", "task-actions-" + taskId);
@@ -75,12 +90,23 @@ const elementCreation = (() => {
         todayCont.appendChild(task);
         console.log(taskId);
         checkBtn.addEventListener("click", function () {
-            elementHandler.getTaskValues(taskId);
+            elementHandler.createTask(taskId);
         });
     }
     function toggleEdit(id) {}
+    function togglePopUp() {
+        document.querySelector(".popup").classList.toggle("hide");
+    }
     document.querySelector("#today-btn").addEventListener("click", createTask);
+    document.querySelector(".x-btn").addEventListener("click", togglePopUp);
+    document
+        .querySelector("#create-btn")
+        .addEventListener("click", togglePopUp);
+    document.getElementById("create-task").onclick = function () {
+        elementHandler.createTask();
+    };
     return {
         createTask,
+        togglePopUp,
     };
 })();
