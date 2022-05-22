@@ -1,7 +1,9 @@
 const elementHandler = (() => {
     let taskList = [];
     let taskCount = 0;
-    function createTask(id) {
+    let container;
+    let today = new Date().toISOString().slice(0, 10);
+    function createTask() {
         const title = document.getElementById("popup-title").value;
         const description = document.getElementById("popup-descr").value;
         const date = document.getElementById("popup-date").value;
@@ -16,7 +18,8 @@ const elementHandler = (() => {
             date: date,
             priority: priority,
         };
-        elementCreation.displayTask(newTask);
+        elementHandler.taskCount++;
+        elementCreation.displayTask(newTask, ".all-todos", true);
         taskList.push(newTask);
         elementCreation.togglePopUp();
         localStorage.setItem("task-list", JSON.stringify(taskList));
@@ -32,13 +35,76 @@ const elementHandler = (() => {
         createTask,
         taskList,
         taskCount,
+        today,
     };
 })();
 
 const elementCreation = (() => {
     const todayCont = document.getElementById("today-container");
+    function toggleEdit(id) {}
+    function togglePopUp() {
+        document.querySelector(".popup").classList.toggle("hide");
+    }
+    function displayTask(inputTask, container, newTask) {
+        let taskId = elementHandler.taskCount;
+        const task = document.createElement("div");
+        // task.setAttribute("id", "task-" + taskId);
+        task.classList.add("task");
 
-    function createTask() {
+        const taskTitle = document.createElement("input");
+        // taskTitle.setAttribute("id", "task-title-" + taskId);
+        taskTitle.type = "text";
+        taskTitle.placeholder = "Title";
+        taskTitle.value = inputTask.title;
+
+        const calendar = document.createElement("input");
+        // calendar.setAttribute("id", "calendar-" + taskId);
+        calendar.type = "date";
+        calendar.value = inputTask.date;
+
+        task.appendChild(taskTitle);
+        task.appendChild(calendar);
+        if (container === ".all-todos" || newTask) {
+            const todoContainers = document.querySelectorAll(".all-todos");
+            todoContainers.forEach((todoContainer) => {
+                todoContainer.appendChild(task.cloneNode(true));
+            });
+        }
+        if (calendar.value.toString() === elementHandler.today.toString()) {
+            document.querySelector("#today-container").appendChild(task.cloneNode(true));
+        }
+    }
+    function displayAllTasks() {
+        elementHandler.taskList.forEach((element) => {
+            elementHandler.taskCount++;
+            displayTask(element, ".all-todos");
+        });
+    }
+    document.querySelector(".x-btn").addEventListener("click", togglePopUp);
+    document
+        .querySelector("#create-btn")
+        .addEventListener("click", togglePopUp);
+    document.getElementById("create-task").onclick = function () {
+        elementHandler.createTask();
+    };
+
+    document.getElementById("todo-page-btn").onclick = function () {
+        document.querySelector(".home-page").classList.add("hide");
+        document.querySelector(".todo-page").classList.remove("hide");
+    };
+    document.getElementById("home-page-btn").onclick = function () {
+        document.querySelector(".todo-page").classList.add("hide");
+        document.querySelector(".home-page").classList.remove("hide");
+    };
+    displayAllTasks();
+    return {
+        togglePopUp,
+        displayTask,
+    };
+})();
+
+/*
+function createTask() {
         elementHandler.taskCount++;
         const taskId = elementHandler.taskCount;
         const task = document.createElement("div");
@@ -78,52 +144,4 @@ const elementCreation = (() => {
             elementHandler.createTask(taskId);
         });
     }
-    function toggleEdit(id) {}
-    function togglePopUp() {
-        document.querySelector(".popup").classList.toggle("hide");
-    }
-    function displayTask(inputTask, container) {
-        const task = document.createElement("div");
-        // task.setAttribute("id", "task-" + taskId);
-        task.classList.add("task");
-
-        const taskTitle = document.createElement("input");
-        // taskTitle.setAttribute("id", "task-title-" + taskId);
-        taskTitle.type = "text";
-        taskTitle.placeholder = "Title";
-        taskTitle.value = inputTask.title;
-
-        const calendar = document.createElement("input");
-        // calendar.setAttribute("id", "calendar-" + taskId);
-        calendar.type = "date";
-        calendar.value = inputTask.date;
-
-        task.appendChild(taskTitle);
-        task.appendChild(calendar);
-        document.querySelector(".all-todos").appendChild(task);
-    }
-    function displayAllTasks() {
-        elementHandler.taskList.forEach(element => {
-            displayTask(element)
-        });
-    }
-    document.querySelector("#today-btn").addEventListener("click", createTask);
-    document.querySelector(".x-btn").addEventListener("click", togglePopUp);
-    document
-        .querySelector("#create-btn")
-        .addEventListener("click", togglePopUp);
-    document.getElementById("create-task").onclick = function () {
-        elementHandler.createTask();
-    };
-    document.getElementById("test").onclick = function () {
-        document.querySelector(".home-page").classList.add("hide")
-        document.querySelector(".todo-page").classList.remove("hide")
-        displayAllTasks()
-        console.log(elementHandler.taskList)
-    }
-    return {
-        createTask,
-        togglePopUp,
-        displayTask,
-    };
-})();
+*/
