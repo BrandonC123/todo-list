@@ -30,6 +30,29 @@ input[type="text"],
     color: white;
 }
 
+li a, button a {
+    display: inline-block;
+    text-decoration: none;
+    color: white;
+    width:100%;
+    height:100%;
+}
+
+li a:hover {
+    font-size: 1.125em;
+    color: lightgray;
+}
+
+.sidebar-tabs li {
+    font-size: 1.2em;
+    list-style: none;
+    margin-bottom: 10px;
+}
+
+.project-container li {
+    font-size: .9em;
+}
+
 .content-container {
     width: 100%;
     padding: 3em;
@@ -37,9 +60,15 @@ input[type="text"],
 
 .home-page {
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
+    flex-direction: column;
     flex-wrap: wrap;
+    height: 100%;
+}
+
+.row {
+    display: flex;
+    justify-content: space-around;
+    height: 50%;
 }
 
 .popup {
@@ -51,11 +80,10 @@ input[type="text"],
     z-index: 1;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0, 0, 0); /* Fallback color */
-    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+    width: 100%; 
+    height: 100%; 
+    background-color: rgb(0, 0, 0); 
+    background-color: rgba(0, 0, 0, 0.4); 
 }
 
 .popup-header {
@@ -84,14 +112,17 @@ input[type="text"],
     border: 2px solid rgb(146, 146, 146);
     background-color: white;
     border-radius: 0.5em;
-    height: 28em;
-    width: 25em;
+    overflow: auto;
+    width: 35%;
+    height: 90%;
     padding: 0.25em;
     box-shadow: 0 0 5px rgb(146, 146, 146);
 }
 
 .task {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 8px;
     max-width: 700px;
     background-color: white;
@@ -159,6 +190,10 @@ input[type="text"],
 .x-btn:hover,
 .secondary-btn:hover {
     opacity: 0.75;
+}
+
+.accent-text {
+    color: royalblue;
 }
 
 .hide {

@@ -12,21 +12,20 @@
             <div class="sidebar">
                 <h1>To Do</h1>
                 <button id="create-btn" class="action-btn">
-                    + Create New Task
+                    <a href="#">+ Create New Task</a>
                 </button>
-                <div>
-                    <p>Home</p>
-                </div>
-                <div>
-                    <p>Inbox</p>
-                </div>
-                <div>
-                    <p>All ToDos</p>
-                </div>
-                <div>
-                    <p>Projects</p>
-                    <div class="project-container"></div>
-                </div>
+                <ul class="sidebar-tabs">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Inbox</a></li>
+                    <li><a id="test" href="#">All ToDos</a></li>
+                    <li>
+                        <a href="#">Projects</a>
+                        <ul class="project-container">
+                            <li>Home reno</li>
+                            <li>Test</li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
             <div class="popup hide">
                 <div class="popup-container">
@@ -35,13 +34,12 @@
                         <button type="button" class="x-btn">X</button>
                     </div>
                     <div class="popup-task">
-                        <form>
+                        <form id="popup-form">
                             <div class="top-task">
                                 <input
                                     id="popup-title"
-                       
                                     type="text"
-                                    value="Comp Sci Assignment"
+                                    placeholder="Title"
                                 />
                                 <input id="popup-date" type="date" />
                             </div>
@@ -56,7 +54,7 @@
                                 <option value="high">High</option>
                             </select>
                             <button
-                                id="create-btn1"
+                                id="create-task"
                                 type="button"
                                 class="secondary-btn"
                             >
@@ -68,29 +66,53 @@
             </div>
             <div class="content-container">
                 <div class="home-page">
-                    <div id="today-card" class="card">
-                        <h3>Today:</h3>
-                        <div id="today-container">
-                            <div class="task">
-                                <input
-                                    readonly
-                                    type="text"
-                                    value="Comp Sci Assignment"
-                                />
-                                <input type="date" />
+                    <div class="row">
+                        <div id="today-card" class="card">
+                            <h3>Today:</h3>
+                            <div id="today-container">
+                                <div class="task">
+                                    <input
+                                        type="text"
+                                        value="Comp Sci Assignment"
+                                    />
+                                    <input type="date" />
+                                    <svg width="40" height="40">
+                                        <rect
+                                            x="7"
+                                            y="7"
+                                            width="25"
+                                            height="25"
+                                            style="
+                                                fill: green;
+                                                stroke: black;
+                                                stroke-width: 3;
+                                                opacity: 0.7;
+                                            "
+                                        />
+                                    </svg>
+                                    <a class="accent-text" href="#">Edit</a>
+                                </div>
                             </div>
-                        </div>
 
-                        <button id="today-btn" class="secondary-btn">
-                            Quick Add +
-                        </button>
+                            <button id="today-btn" class="secondary-btn">
+                                Quick Add +
+                            </button>
+                        </div>
+                        <div class="card">
+                            <h3>Upcoming:</h3>
+                        </div>
                     </div>
-                    <div class="card">
-                        <h3>Upcoming:</h3>
+                    <div class="row">
+                        <div class="card">
+                            <h3>Projects:</h3>
+                        </div>
+                        <div class="card">
+                            <h3>All ToDos:</h3>
+                        </div>
                     </div>
-                    <div class="card">
-                        <h3>Projects:</h3>
-                    </div>
+                </div>
+                <div class="todo-page hide">
+                    <div class="all-todos"></div>
                 </div>
             </div>
         </div>
