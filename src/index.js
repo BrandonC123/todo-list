@@ -1,24 +1,3 @@
-const task = (title, description, dueDate, priority) => {
-    function getTitle() {
-        return title;
-    }
-    function getDescription() {
-        return description;
-    }
-    function getDueDate() {
-        return dueDate;
-    }
-    function getPriority() {
-        return priority;
-    }
-    return {
-        getTitle,
-        getDescription,
-        getDueDate,
-        getPriority,
-    };
-};
-
 const elementHandler = (() => {
     let taskList = [];
     let taskCount = 0;
@@ -31,15 +10,21 @@ const elementHandler = (() => {
         console.log(date);
         console.log(description);
         console.log(priority);
-        const newTask = task(title, description, date, priority);
+        const newTask = {
+            title: title,
+            description: description,
+            date: date,
+            priority: priority,
+        };
+        elementCreation.displayTask(newTask);
         taskList.push(newTask);
-        console.log(taskList[0].getDueDate());
         elementCreation.togglePopUp();
-        localStorage.setItem("task-list", description);
-        // create task with construct, add to array
+        localStorage.setItem("task-list", JSON.stringify(taskList));
+        document.getElementById("popup-form").reset();
     }
     try {
-        console.log(localStorage.getItem("task-list") + " local storage");
+        console.log(JSON.parse(localStorage.getItem("task-list") || "[]"));
+        taskList = JSON.parse(localStorage.getItem("task-list") || "[]");
     } catch (e) {
         console.log("empty");
     }
@@ -97,6 +82,31 @@ const elementCreation = (() => {
     function togglePopUp() {
         document.querySelector(".popup").classList.toggle("hide");
     }
+    function displayTask(inputTask, container) {
+        const task = document.createElement("div");
+        // task.setAttribute("id", "task-" + taskId);
+        task.classList.add("task");
+
+        const taskTitle = document.createElement("input");
+        // taskTitle.setAttribute("id", "task-title-" + taskId);
+        taskTitle.type = "text";
+        taskTitle.placeholder = "Title";
+        taskTitle.value = inputTask.title;
+
+        const calendar = document.createElement("input");
+        // calendar.setAttribute("id", "calendar-" + taskId);
+        calendar.type = "date";
+        calendar.value = inputTask.date;
+
+        task.appendChild(taskTitle);
+        task.appendChild(calendar);
+        document.querySelector(".all-todos").appendChild(task);
+    }
+    function displayAllTasks() {
+        elementHandler.taskList.forEach(element => {
+            displayTask(element)
+        });
+    }
     document.querySelector("#today-btn").addEventListener("click", createTask);
     document.querySelector(".x-btn").addEventListener("click", togglePopUp);
     document
@@ -105,8 +115,15 @@ const elementCreation = (() => {
     document.getElementById("create-task").onclick = function () {
         elementHandler.createTask();
     };
+    document.getElementById("test").onclick = function () {
+        document.querySelector(".home-page").classList.add("hide")
+        document.querySelector(".todo-page").classList.remove("hide")
+        displayAllTasks()
+        console.log(elementHandler.taskList)
+    }
     return {
         createTask,
         togglePopUp,
+        displayTask,
     };
 })();
