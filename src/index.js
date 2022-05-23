@@ -2,7 +2,9 @@ const elementHandler = (() => {
     let taskList = [];
     let taskCount = 0;
     let container;
-    let today = new Date().toISOString().slice(0, 10);
+    let today = new Date()
+        .toLocaleString("sv", { timeZoneName: "short" })
+        .slice(0, 10);
     function createTask() {
         const title = document.getElementById("popup-title").value;
         const description = document.getElementById("popup-descr").value;
@@ -62,16 +64,32 @@ const elementCreation = (() => {
         calendar.type = "date";
         calendar.value = inputTask.date;
 
+        const prioritySquare = document.createElement("div");
+        prioritySquare.classList.add("priority-square");
+        prioritySquare.style.backgroundColor = getPriorityColor(
+            inputTask.priority.toString()
+        );
+
+        const edit = document.createElement("a");
+        edit.classList.add("accent-text");
+        edit.textContent = "Edit"
+        edit.href = "#";
+
         task.appendChild(taskTitle);
         task.appendChild(calendar);
+        task.appendChild(prioritySquare);
+        task.appendChild(edit);
+
         if (container === ".all-todos" || newTask) {
             const todoContainers = document.querySelectorAll(".all-todos");
             todoContainers.forEach((todoContainer) => {
                 todoContainer.appendChild(task.cloneNode(true));
             });
         }
-        if (calendar.value.toString() === elementHandler.today.toString()) {
-            document.querySelector("#today-container").appendChild(task.cloneNode(true));
+        if (inputTask.date.toString() === elementHandler.today.toString()) {
+            document
+                .querySelector("#today-container")
+                .appendChild(task.cloneNode(true));
         }
     }
     function displayAllTasks() {
@@ -79,6 +97,16 @@ const elementCreation = (() => {
             elementHandler.taskCount++;
             displayTask(element, ".all-todos");
         });
+    }
+    function getPriorityColor(priority) {
+        if (priority === "high") {
+            return "#C40233";
+        }
+        if (priority === "med") {
+            return "#FED000";
+        } else {
+            return "#48A14D";
+        }
     }
     document.querySelector(".x-btn").addEventListener("click", togglePopUp);
     document
