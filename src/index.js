@@ -1,7 +1,16 @@
 const elementHandler = (() => {
     let taskList = [];
-    let taskCount = 0;
-    let container;
+    try {
+        console.log(JSON.parse(localStorage.getItem("task-list") || "[]"));
+        taskList = JSON.parse(localStorage.getItem("task-list") || "[]");
+        // localStorage.removeItem("task-list");
+    } catch (e) {
+        console.log("empty");
+    }
+    let taskCount =
+        taskList.length != 0
+            ? JSON.parse(taskList[taskList.length - 1].taskId)
+            : 0;
     let today = new Date()
         .toLocaleString("sv", { timeZoneName: "short" })
         .slice(0, 10);
@@ -10,28 +19,20 @@ const elementHandler = (() => {
         const description = document.getElementById("popup-descr").value;
         const date = document.getElementById("popup-date").value;
         const priority = document.getElementById("popup-priority").value;
-        console.log(title);
-        console.log(date);
-        console.log(description);
-        console.log(priority);
+        taskCount++;
         const newTask = {
             title: title,
             description: description,
             date: date,
             priority: priority,
+            taskId: taskCount,
         };
-        elementHandler.taskCount++;
+        console.log(newTask);
         elementCreation.displayTask(newTask, ".all-todos", true);
         taskList.push(newTask);
         elementCreation.togglePopUp();
         localStorage.setItem("task-list", JSON.stringify(taskList));
         document.getElementById("popup-form").reset();
-    }
-    try {
-        console.log(JSON.parse(localStorage.getItem("task-list") || "[]"));
-        taskList = JSON.parse(localStorage.getItem("task-list") || "[]");
-    } catch (e) {
-        console.log("empty");
     }
     return {
         createTask,
@@ -72,7 +73,7 @@ const elementCreation = (() => {
 
         const edit = document.createElement("a");
         edit.classList.add("accent-text");
-        edit.textContent = "Edit"
+        edit.textContent = "Edit";
         edit.href = "#";
 
         task.appendChild(taskTitle);
