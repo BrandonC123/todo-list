@@ -34,11 +34,19 @@ const elementHandler = (() => {
         localStorage.setItem("task-list", JSON.stringify(taskList));
         document.getElementById("popup-form").reset();
     }
+    function getTaskById(id) {
+        for (let i = 0; i < taskList.length; i++) {
+            if (taskList[i].taskId == id) {
+                return taskList[i];
+            }
+        }
+    }
     return {
         createTask,
         taskList,
         taskCount,
         today,
+        getTaskById,
     };
 })();
 
@@ -49,7 +57,7 @@ const elementCreation = (() => {
         document.querySelector(".popup").classList.toggle("hide");
     }
     function displayTask(inputTask, container, newTask) {
-        let taskId = elementHandler.taskCount;
+        let taskId = inputTask.taskId;
         const task = document.createElement("div");
         // task.setAttribute("id", "task-" + taskId);
         task.classList.add("task");
@@ -72,6 +80,7 @@ const elementCreation = (() => {
         );
 
         const edit = document.createElement("a");
+        edit.setAttribute("id", "edit-" + taskId);
         edit.classList.add("accent-text");
         edit.textContent = "Edit";
         edit.href = "#";
@@ -80,7 +89,7 @@ const elementCreation = (() => {
         task.appendChild(calendar);
         task.appendChild(prioritySquare);
         task.appendChild(edit);
-
+        // console.log(document.querySelector("edit-" + taskId));
         if (container === ".all-todos" || newTask) {
             const todoContainers = document.querySelectorAll(".all-todos");
             todoContainers.forEach((todoContainer) => {
@@ -92,6 +101,11 @@ const elementCreation = (() => {
                 .querySelector("#today-container")
                 .appendChild(task.cloneNode(true));
         }
+        document
+            .getElementById("edit-" + taskId)
+            .addEventListener("click", function () {
+                console.log(elementHandler.getTaskById(taskId));
+            });
     }
     function displayAllTasks() {
         elementHandler.taskList.forEach((element) => {
