@@ -37,7 +37,11 @@ const elementHandler = (() => {
     function getTaskById(id) {
         for (let i = 0; i < taskList.length; i++) {
             if (taskList[i].taskId == id) {
-                return taskList[i];
+                const task = {
+                    taskObj: taskList[i],
+                    index: i,
+                };
+                return task;
             }
         }
     }
@@ -55,6 +59,7 @@ const elementCreation = (() => {
     function toggleEdit(id) {}
     function togglePopUp() {
         document.querySelector(".popup").classList.toggle("hide");
+        document.querySelector(".edit-popup").classList.toggle("hide");
     }
     function displayTask(inputTask, container, newTask) {
         let taskId = inputTask.taskId;
@@ -80,8 +85,9 @@ const elementCreation = (() => {
         );
 
         const edit = document.createElement("a");
-        edit.setAttribute("id", "edit-" + taskId);
+        // edit.setAttribute("id", "edit-" + taskId);
         edit.classList.add("accent-text");
+        edit.classList.add("edit-" + taskId);
         edit.textContent = "Edit";
         edit.href = "#";
 
@@ -101,11 +107,21 @@ const elementCreation = (() => {
                 .querySelector("#today-container")
                 .appendChild(task.cloneNode(true));
         }
-        document
-            .getElementById("edit-" + taskId)
-            .addEventListener("click", function () {
-                console.log(elementHandler.getTaskById(taskId));
+        const editBtns = document.querySelectorAll(".edit-" + taskId);
+        editBtns.forEach((btn) => {
+            btn.addEventListener("click", function () {
+                fillEditPopup(taskId);
             });
+        });
+    }
+    function fillEditPopup(id) {
+        const task = elementHandler.getTaskById(id).taskObj;
+        console.log(elementHandler.getTaskById(id));
+        document.querySelector(".edit-popup").classList.toggle("hide");
+        document.getElementById("edit-popup-title").value = task.title;
+        document.getElementById("edit-popup-date").value = task.date;
+        document.getElementById("edit-popup-descr").value = task.description;
+        document.getElementById("edit-popup-priority").value = task.priority;
     }
     function displayAllTasks() {
         elementHandler.taskList.forEach((element) => {
