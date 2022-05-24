@@ -46,7 +46,7 @@ const elementHandler = (() => {
             description: description,
             date: date,
             priority: priority,
-            taskId: taskCount,
+            taskId: getTaskById(id).taskObj.taskId,
         };
         console.log(updatedTask);
         const index = getTaskById(id).index;
