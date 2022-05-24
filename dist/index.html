@@ -17,7 +17,9 @@
                 <ul class="sidebar-tabs">
                     <li><a id="home-page-btn" class="tab" href="#">Home</a></li>
                     <li><a class="tab" href="#">Inbox</a></li>
-                    <li><a id="todo-page-btn" class="tab" href="#">All ToDos</a></li>
+                    <li>
+                        <a id="todo-page-btn" class="tab" href="#">All ToDos</a>
+                    </li>
                     <li>
                         <a class="tab" href="#">Projects</a>
                         <ul class="project-container">
@@ -64,6 +66,43 @@
                     </div>
                 </div>
             </div>
+            <div class="edit-popup hide popup">
+                <div class="popup-container">
+                    <div class="popup-header">
+                        <h3>Update Task</h3>
+                        <button type="button" class="x-btn">X</button>
+                    </div>
+                    <div class="popup-task">
+                        <form id="popup-form">
+                            <div class="top-task">
+                                <input
+                                    id="edit-popup-title"
+                                    type="text"
+                                    placeholder="Title"
+                                />
+                                <input id="edit-popup-date" type="date" />
+                            </div>
+                            <textarea
+                                id="edit-popup-descr"
+                                placeholder="Description"
+                            ></textarea>
+                            <select id="edit-popup-priority">
+                                <option value="">--Priority Level--</option>
+                                <option value="low">Low</option>
+                                <option value="med">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                            <button
+                                id="edit-task"
+                                type="button"
+                                class="secondary-btn"
+                            >
+                                Update
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
             <div class="content-container">
                 <div class="home-page">
                     <div class="row">
@@ -76,20 +115,7 @@
                                         value="Comp Sci Assignment"
                                     />
                                     <input type="date" />
-                                    <svg width="40" height="40">
-                                        <rect
-                                            x="7"
-                                            y="7"
-                                            width="25"
-                                            height="25"
-                                            style="
-                                                fill: green;
-                                                stroke: black;
-                                                stroke-width: 3;
-                                                opacity: 0.7;
-                                            "
-                                        />
-                                    </svg>
+                                    <div class="priority-square"></div>
                                     <a class="accent-text" href="#">Edit</a>
                                 </div>
                             </div>
