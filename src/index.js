@@ -1,3 +1,5 @@
+const { differenceInCalendarDays } = require("date-fns");
+
 const elementHandler = (() => {
     let taskList = [];
     try {
@@ -54,7 +56,6 @@ const elementHandler = (() => {
         localStorage.setItem("task-list", JSON.stringify(taskList));
         elementCreation.clearContainers();
         elementCreation.displayAllTasks();
-        // document.getElementById("edit-popup-form").reset();
     }
     function getTaskById(id) {
         for (let i = 0; i < taskList.length; i++) {
@@ -71,7 +72,14 @@ const elementHandler = (() => {
         taskList.splice(index, 1);
         elementCreation.clearContainers();
         localStorage.setItem("task-list", JSON.stringify(taskList));
+        elementCreation.displayAllTasks();
         console.log(taskList);
+    }
+    function getUpcoming(inputDate) {
+        let today = new Date();
+        let testDate = new Date(inputDate);
+        let result = differenceInCalendarDays(testDate, today);
+        return result <= 7 && result >= 0 ? true : false;
     }
     return {
         createTask,
@@ -81,6 +89,7 @@ const elementHandler = (() => {
         getTaskById,
         editTask,
         deleteTask,
+        getUpcoming,
     };
 })();
 
@@ -141,16 +150,21 @@ const elementCreation = (() => {
         task.appendChild(edit);
         task.appendChild(deleteBtn);
         // console.log(document.querySelector("edit-" + taskId));
+        if (inputTask.date.toString() === elementHandler.today.toString()) {
+            document
+                .querySelector("#today-container")
+                .appendChild(task.cloneNode(true));
+        }
+        if (elementHandler.getUpcoming(inputTask.date)) {
+            document
+                .querySelector(".upcoming")
+                .appendChild(task.cloneNode(true));
+        }
         if (container === ".all-todos" || newTask) {
             const todoContainers = document.querySelectorAll(".all-todos");
             todoContainers.forEach((todoContainer) => {
                 todoContainer.appendChild(task.cloneNode(true));
             });
-        }
-        if (inputTask.date.toString() === elementHandler.today.toString()) {
-            document
-                .querySelector("#today-container")
-                .appendChild(task.cloneNode(true));
         }
         const editBtns = document.querySelectorAll(".edit-" + taskId);
         editBtns.forEach((btn) => {
@@ -189,7 +203,7 @@ const elementCreation = (() => {
             todoContainer.innerHTML = "";
         });
         document.getElementById("today-container").innerHTML = "";
-        elementCreation.displayAllTasks();
+        document.querySelector(".upcoming").innerHTML = "";
     }
     function getPriorityColor(priority) {
         if (priority === "high") {
