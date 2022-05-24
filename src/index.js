@@ -52,6 +52,7 @@ const elementHandler = (() => {
         elementCreation.togglePopUp("edit");
         console.log(taskList);
         localStorage.setItem("task-list", JSON.stringify(taskList));
+        elementCreation.clearContainers();
         elementCreation.displayAllTasks();
         // document.getElementById("edit-popup-form").reset();
     }
@@ -66,6 +67,12 @@ const elementHandler = (() => {
             }
         }
     }
+    function deleteTask(index) {
+        taskList.splice(index, 1);
+        elementCreation.clearContainers();
+        localStorage.setItem("task-list", JSON.stringify(taskList));
+        console.log(taskList);
+    }
     return {
         createTask,
         taskList,
@@ -73,6 +80,7 @@ const elementHandler = (() => {
         today,
         getTaskById,
         editTask,
+        deleteTask,
     };
 })();
 
@@ -150,6 +158,14 @@ const elementCreation = (() => {
                 fillEditPopup(taskId);
             });
         });
+        const deleteBtns = document.querySelectorAll(".delete-" + taskId);
+        deleteBtns.forEach((btn) => {
+            btn.addEventListener("click", function () {
+                elementHandler.deleteTask(
+                    elementHandler.getTaskById(taskId).index
+                );
+            });
+        });
     }
     function fillEditPopup(id) {
         const task = elementHandler.getTaskById(id).taskObj;
@@ -166,6 +182,14 @@ const elementCreation = (() => {
             elementHandler.taskCount++;
             displayTask(element, ".all-todos");
         });
+    }
+    function clearContainers() {
+        const todoContainers = document.querySelectorAll(".all-todos");
+        todoContainers.forEach((todoContainer) => {
+            todoContainer.innerHTML = "";
+        });
+        document.getElementById("today-container").innerHTML = "";
+        elementCreation.displayAllTasks();
     }
     function getPriorityColor(priority) {
         if (priority === "high") {
@@ -208,6 +232,7 @@ const elementCreation = (() => {
         togglePopUp,
         displayTask,
         displayAllTasks,
+        clearContainers,
     };
 })();
 
