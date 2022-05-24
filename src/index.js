@@ -30,9 +30,30 @@ const elementHandler = (() => {
         console.log(newTask);
         elementCreation.displayTask(newTask, ".all-todos", true);
         taskList.push(newTask);
-        elementCreation.togglePopUp();
+        elementCreation.togglePopUp("create");
         localStorage.setItem("task-list", JSON.stringify(taskList));
         document.getElementById("popup-form").reset();
+    }
+    function editTask(id) {
+        const title = document.getElementById("edit-popup-title").value;
+        const description = document.getElementById("edit-popup-descr").value;
+        const date = document.getElementById("edit-popup-date").value;
+        const priority = document.getElementById("edit-popup-priority").value;
+        const updatedTask = {
+            title: title,
+            description: description,
+            date: date,
+            priority: priority,
+            taskId: taskCount,
+        };
+        console.log(updatedTask);
+        const index = getTaskById(id).index;
+        taskList[index] = updatedTask;
+        elementCreation.togglePopUp("edit");
+        console.log(taskList);
+        localStorage.setItem("task-list", JSON.stringify(taskList));
+        elementCreation.displayAllTasks();
+        // document.getElementById("edit-popup-form").reset();
     }
     function getTaskById(id) {
         for (let i = 0; i < taskList.length; i++) {
@@ -51,15 +72,23 @@ const elementHandler = (() => {
         taskCount,
         today,
         getTaskById,
+        editTask,
     };
 })();
 
 const elementCreation = (() => {
-    const todayCont = document.getElementById("today-container");
-    function toggleEdit(id) {}
-    function togglePopUp() {
-        document.querySelector(".popup").classList.toggle("hide");
-        document.querySelector(".edit-popup").classList.toggle("hide");
+    let activeId;
+    function togglePopUp(action) {
+        if (action === "create") {
+            document.querySelector(".popup").classList.toggle("hide");
+        }
+        if (action === "edit") {
+            document.querySelector(".edit-popup").classList.toggle("hide");
+        }
+        if (action === "close") {
+            document.querySelector(".popup").classList.add("hide");
+            document.querySelector(".edit-popup").classList.add("hide");
+        }
     }
     function displayTask(inputTask, container, newTask) {
         let taskId = inputTask.taskId;
@@ -91,10 +120,18 @@ const elementCreation = (() => {
         edit.textContent = "Edit";
         edit.href = "#";
 
+        const deleteBtn = document.createElement("a");
+        // delete.setAttribute("id", "delete-" + taskId);
+        deleteBtn.classList.add("danger-text");
+        deleteBtn.classList.add("delete-" + taskId);
+        deleteBtn.textContent = "Delete";
+        deleteBtn.href = "#";
+
         task.appendChild(taskTitle);
         task.appendChild(calendar);
         task.appendChild(prioritySquare);
         task.appendChild(edit);
+        task.appendChild(deleteBtn);
         // console.log(document.querySelector("edit-" + taskId));
         if (container === ".all-todos" || newTask) {
             const todoContainers = document.querySelectorAll(".all-todos");
@@ -117,6 +154,7 @@ const elementCreation = (() => {
     function fillEditPopup(id) {
         const task = elementHandler.getTaskById(id).taskObj;
         console.log(elementHandler.getTaskById(id));
+        activeId = task.taskId;
         document.querySelector(".edit-popup").classList.toggle("hide");
         document.getElementById("edit-popup-title").value = task.title;
         document.getElementById("edit-popup-date").value = task.date;
@@ -139,12 +177,22 @@ const elementCreation = (() => {
             return "#48A14D";
         }
     }
-    document.querySelector(".x-btn").addEventListener("click", togglePopUp);
+    const closeBtns = document.querySelectorAll(".x-btn");
+    closeBtns.forEach((btn) => {
+        btn.addEventListener("click", function () {
+            togglePopUp("close");
+        });
+    });
     document
         .querySelector("#create-btn")
-        .addEventListener("click", togglePopUp);
+        .addEventListener("click", function () {
+            togglePopUp("create");
+        });
     document.getElementById("create-task").onclick = function () {
         elementHandler.createTask();
+    };
+    document.getElementById("edit-task").onclick = function () {
+        elementHandler.editTask(activeId);
     };
 
     document.getElementById("todo-page-btn").onclick = function () {
@@ -159,6 +207,7 @@ const elementCreation = (() => {
     return {
         togglePopUp,
         displayTask,
+        displayAllTasks,
     };
 })();
 
