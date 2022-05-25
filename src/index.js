@@ -2,13 +2,23 @@ const { differenceInCalendarDays } = require("date-fns");
 
 const projectHandler = (() => {
     let projectList = [];
+    try {
+        console.log(JSON.parse(localStorage.getItem("project-list") || "[]"));
+        projectList = JSON.parse(localStorage.getItem("project-list") || "[]");
+        // localStorage.removeItem("task-list");
+    } catch (e) {
+        console.log("empty");
+    }
     let projectCount =
         projectList.length != 0
             ? JSON.parse(projectList[projectList.length - 1].projectId)
             : 0;
     function createProject() {
-        const title = "project title";
-        const description = "description";
+        const title = document.getElementById("project-popup-title").value;
+        const description = document.getElementById(
+            "project-popup-descr"
+        ).value;
+        const date = document.getElementById("project-popup-date").value;
         let tasks = [
             {
                 title: "task title",
@@ -18,15 +28,20 @@ const projectHandler = (() => {
                 taskId: 2,
             },
         ];
+        projectCount++;
         const project = {
             title: title,
             description: description,
+            dueDate: date,
             tasks: tasks,
-            projectId: 1,
+            projectId: projectCount,
         };
         projectList.push(project);
         localStorage.setItem("project-list", JSON.stringify(projectList));
-        console.log(JSON.parse(localStorage.getItem("project-list") || "[]"));
+        return project;
+    }
+    return {
+        createProject,
     }
 })();
 
@@ -77,11 +92,11 @@ const taskHandler = (() => {
         console.log(updatedTask);
         const index = getTaskById(id).index;
         taskList[index] = updatedTask;
-        elementCreation.togglePopUp("edit");
+        displayHandler.togglePopUp("edit");
         console.log(taskList);
         localStorage.setItem("task-list", JSON.stringify(taskList));
-        elementCreation.clearContainers();
-        elementCreation.displayAllTasks();
+        displayHandler.clearContainers();
+        displayHandler.displayAllTasks();
     }
     function getTaskById(id) {
         for (let i = 0; i < taskList.length; i++) {
@@ -96,9 +111,9 @@ const taskHandler = (() => {
     }
     function deleteTask(index) {
         taskList.splice(index, 1);
-        elementCreation.clearContainers();
+        displayHandler.clearContainers();
         localStorage.setItem("task-list", JSON.stringify(taskList));
-        elementCreation.displayAllTasks();
+        displayHandler.displayAllTasks();
         console.log(taskList);
     }
     function getUpcoming(inputDate) {
@@ -119,7 +134,7 @@ const taskHandler = (() => {
     };
 })();
 
-const elementCreation = (() => {
+const displayHandler = (() => {
     let activeId;
     function togglePopUp(action) {
         if (action === "create") {
@@ -128,9 +143,13 @@ const elementCreation = (() => {
         if (action === "edit") {
             document.querySelector(".edit-popup").classList.toggle("hide");
         }
+        if (action === "create-project") {
+            document.querySelector(".project-popup").classList.toggle("hide");
+        }
         if (action === "close") {
             document.querySelector(".popup").classList.add("hide");
             document.querySelector(".edit-popup").classList.add("hide");
+            document.querySelector(".project-popup").classList.add("hide");
         }
     }
     function displayTask(inputTask, container, newTask) {
@@ -256,16 +275,27 @@ const elementCreation = (() => {
         });
     document.getElementById("create-task").onclick = function () {
         taskHandler.createTask();
-        elementCreation.displayTask(newTask, ".all-todos", true);
+        displayHandler.displayTask(newTask, ".all-todos", true);
         taskList.push(newTask);
-        elementCreation.togglePopUp("create");
+        displayHandler.togglePopUp("create");
         localStorage.setItem("task-list", JSON.stringify(taskList));
         document.getElementById("popup-form").reset();
     };
     document.getElementById("edit-task").onclick = function () {
         taskHandler.editTask(activeId);
     };
-
+    document
+        .getElementById("new-project")
+        .addEventListener("click", function () {
+            togglePopUp("create-project");
+        });
+    document
+        .getElementById("create-project")
+        .addEventListener("click", function () {
+            const projectTitle = document.createElement("li");
+            projectTitle.textContent = projectHandler.createProject().title;
+            document.querySelector(".project-tab").appendChild(projectTitle);
+        });
     document.getElementById("todo-page-btn").onclick = function () {
         document.querySelector(".home-page").classList.add("hide");
         document.querySelector(".todo-page").classList.remove("hide");
