@@ -1,6 +1,36 @@
 const { differenceInCalendarDays } = require("date-fns");
 
-const elementHandler = (() => {
+const projectHandler = (() => {
+    let projectList = [];
+    let projectCount =
+        projectList.length != 0
+            ? JSON.parse(projectList[projectList.length - 1].projectId)
+            : 0;
+    function createProject() {
+        const title = "project title";
+        const description = "description";
+        let tasks = [
+            {
+                title: "task title",
+                description: "des",
+                date: "2022-05-28",
+                priority: "high",
+                taskId: 2,
+            },
+        ];
+        const project = {
+            title: title,
+            description: description,
+            tasks: tasks,
+            projectId: 1,
+        };
+        projectList.push(project);
+        localStorage.setItem("project-list", JSON.stringify(projectList));
+        console.log(JSON.parse(localStorage.getItem("project-list") || "[]"));
+    }
+})();
+
+const taskHandler = (() => {
     let taskList = [];
     try {
         console.log(JSON.parse(localStorage.getItem("task-list") || "[]"));
@@ -30,11 +60,7 @@ const elementHandler = (() => {
             taskId: taskCount,
         };
         console.log(newTask);
-        elementCreation.displayTask(newTask, ".all-todos", true);
-        taskList.push(newTask);
-        elementCreation.togglePopUp("create");
-        localStorage.setItem("task-list", JSON.stringify(taskList));
-        document.getElementById("popup-form").reset();
+        return newTask;
     }
     function editTask(id) {
         const title = document.getElementById("edit-popup-title").value;
@@ -113,6 +139,9 @@ const elementCreation = (() => {
         // task.setAttribute("id", "task-" + taskId);
         task.classList.add("task");
 
+        const checkBox = document.createElement("input");
+        checkBox.type = "checkbox";
+
         const taskTitle = document.createElement("input");
         // taskTitle.setAttribute("id", "task-title-" + taskId);
         taskTitle.type = "text";
@@ -144,18 +173,19 @@ const elementCreation = (() => {
         deleteBtn.textContent = "Delete";
         deleteBtn.href = "#";
 
+        task.appendChild(checkBox);
         task.appendChild(taskTitle);
         task.appendChild(calendar);
         task.appendChild(prioritySquare);
         task.appendChild(edit);
         task.appendChild(deleteBtn);
         // console.log(document.querySelector("edit-" + taskId));
-        if (inputTask.date.toString() === elementHandler.today.toString()) {
+        if (inputTask.date.toString() === taskHandler.today.toString()) {
             document
                 .querySelector("#today-container")
                 .appendChild(task.cloneNode(true));
         }
-        if (elementHandler.getUpcoming(inputTask.date)) {
+        if (taskHandler.getUpcoming(inputTask.date)) {
             document
                 .querySelector(".upcoming")
                 .appendChild(task.cloneNode(true));
@@ -175,15 +205,13 @@ const elementCreation = (() => {
         const deleteBtns = document.querySelectorAll(".delete-" + taskId);
         deleteBtns.forEach((btn) => {
             btn.addEventListener("click", function () {
-                elementHandler.deleteTask(
-                    elementHandler.getTaskById(taskId).index
-                );
+                taskHandler.deleteTask(taskHandler.getTaskById(taskId).index);
             });
         });
     }
     function fillEditPopup(id) {
-        const task = elementHandler.getTaskById(id).taskObj;
-        console.log(elementHandler.getTaskById(id));
+        const task = taskHandler.getTaskById(id).taskObj;
+        console.log(taskHandler.getTaskById(id));
         activeId = task.taskId;
         document.querySelector(".edit-popup").classList.toggle("hide");
         document.getElementById("edit-popup-title").value = task.title;
@@ -192,8 +220,8 @@ const elementCreation = (() => {
         document.getElementById("edit-popup-priority").value = task.priority;
     }
     function displayAllTasks() {
-        elementHandler.taskList.forEach((element) => {
-            elementHandler.taskCount++;
+        taskHandler.taskList.forEach((element) => {
+            taskHandler.taskCount++;
             displayTask(element, ".all-todos");
         });
     }
@@ -227,10 +255,15 @@ const elementCreation = (() => {
             togglePopUp("create");
         });
     document.getElementById("create-task").onclick = function () {
-        elementHandler.createTask();
+        taskHandler.createTask();
+        elementCreation.displayTask(newTask, ".all-todos", true);
+        taskList.push(newTask);
+        elementCreation.togglePopUp("create");
+        localStorage.setItem("task-list", JSON.stringify(taskList));
+        document.getElementById("popup-form").reset();
     };
     document.getElementById("edit-task").onclick = function () {
-        elementHandler.editTask(activeId);
+        taskHandler.editTask(activeId);
     };
 
     document.getElementById("todo-page-btn").onclick = function () {
@@ -249,46 +282,3 @@ const elementCreation = (() => {
         clearContainers,
     };
 })();
-
-/*
-function createTask() {
-        elementHandler.taskCount++;
-        const taskId = elementHandler.taskCount;
-        const task = document.createElement("div");
-        task.setAttribute("id", "task-" + taskId);
-        task.classList.add("task");
-
-        const taskTitle = document.createElement("input");
-        taskTitle.setAttribute("id", "task-title-" + taskId);
-        taskTitle.type = "text";
-        taskTitle.placeholder = "Title";
-
-        const calendar = document.createElement("input");
-        calendar.setAttribute("id", "calendar-" + taskId);
-        calendar.type = "date";
-        calendar = "2022-05-03";
-
-        const taskActions = document.createElement("div");
-        taskActions.setAttribute("id", "task-actions-" + taskId);
-        taskActions.classList.add("task-actions");
-        const checkBtn = document.createElement("button");
-        checkBtn.setAttribute("id", "check-" + taskId);
-        checkBtn.classList.add("check-btn");
-        checkBtn.textContent = "✔";
-        const xBtn = document.createElement("button");
-        xBtn.setAttribute("id", "x-" + taskId);
-        xBtn.classList.add("x-btn");
-        xBtn.textContent = "X";
-        taskActions.appendChild(checkBtn);
-        taskActions.appendChild(xBtn);
-
-        task.appendChild(taskTitle);
-        task.appendChild(calendar);
-        task.appendChild(taskActions);
-        todayCont.appendChild(task);
-        console.log(taskId);
-        checkBtn.addEventListener("click", function () {
-            elementHandler.createTask(taskId);
-        });
-    }
-*/
