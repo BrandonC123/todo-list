@@ -36,8 +36,8 @@
                         <button type="button" class="x-btn">X</button>
                     </div>
                     <div class="popup-task">
-                        <form id="popup-form">
-                            <div class="top-task">
+                        <form id="popup-form" class="form">
+                            <div class="task-divider">
                                 <input
                                     id="popup-title"
                                     type="text"
@@ -47,21 +47,24 @@
                             </div>
                             <textarea
                                 id="popup-descr"
+                                class="description"
                                 placeholder="Description"
                             ></textarea>
-                            <select id="popup-priority">
-                                <option value="">--Priority Level--</option>
-                                <option value="low">Low</option>
-                                <option value="med">Medium</option>
-                                <option value="high">High</option>
-                            </select>
-                            <button
-                                id="create-task"
-                                type="button"
-                                class="secondary-btn"
-                            >
-                                Create
-                            </button>
+                            <div class="task-divider">
+                                <select id="popup-priority">
+                                    <option value="">--Priority Level--</option>
+                                    <option value="low">Low</option>
+                                    <option value="med">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                                <button
+                                    id="create-task"
+                                    type="button"
+                                    class="secondary-btn"
+                                >
+                                    Create
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -73,8 +76,8 @@
                         <button type="button" class="x-btn">X</button>
                     </div>
                     <div class="popup-task">
-                        <form id="popup-form">
-                            <div class="top-task">
+                        <form id="edit-popup-form" class="form">
+                            <div class="task-divider">
                                 <input
                                     id="edit-popup-title"
                                     type="text"
@@ -84,21 +87,25 @@
                             </div>
                             <textarea
                                 id="edit-popup-descr"
+                                class="description"
                                 placeholder="Description"
                             ></textarea>
-                            <select id="edit-popup-priority">
-                                <option value="">--Priority Level--</option>
-                                <option value="low">Low</option>
-                                <option value="med">Medium</option>
-                                <option value="high">High</option>
-                            </select>
-                            <button
-                                id="edit-task"
-                                type="button"
-                                class="secondary-btn"
-                            >
-                                Update
-                            </button>
+                            <div class="task-divider">
+                                <select id="edit-popup-priority">
+                                    <option value="">--Priority Level--</option>
+                                    <option value="low">Low</option>
+                                    <option value="med">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+
+                                <button
+                                    id="edit-task"
+                                    type="button"
+                                    class="secondary-btn"
+                                >
+                                    Update
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -109,7 +116,7 @@
                         <div id="today-card" class="card">
                             <h3>Today:</h3>
                             <div id="today-container">
-                                <div class="task">
+                                <!-- <div class="task">
                                     <input
                                         type="text"
                                         value="Comp Sci Assignment"
@@ -117,20 +124,22 @@
                                     <input type="date" />
                                     <div class="priority-square"></div>
                                     <a class="accent-text" href="#">Edit</a>
-                                </div>
+                                </div> -->
                             </div>
-
-                            <button id="today-btn" class="secondary-btn">
-                                Quick Add +
-                            </button>
                         </div>
                         <div class="card">
                             <h3>Upcoming:</h3>
+                            <div class="upcoming"></div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="card">
-                            <h3>Projects:</h3>
+                            <div class="task-divider">
+                                <h3>Projects:</h3>
+                                <button id="create-project" class="secondary-btn">
+                                    + Create New Project
+                                </button>
+                            </div>
                         </div>
                         <div class="card">
                             <h3>All ToDos:</h3>
