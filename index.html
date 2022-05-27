@@ -11,9 +11,9 @@
         <div class="overall-container">
             <div class="sidebar">
                 <h1>To Do</h1>
-                <button id="create-btn" class="action-btn">
-                    <a href="#">+ Create New Task</a>
-                </button>
+                <a id="create-btn" class="action-btn" href="#"
+                    >+ Create New Todo</a
+                >
                 <ul class="sidebar-tabs">
                     <li><a id="home-page-btn" class="tab" href="#">Home</a></li>
                     <li><a class="tab" href="#">Inbox</a></li>
@@ -29,12 +29,12 @@
             <div class="popup hide">
                 <div class="popup-container">
                     <div class="popup-header">
-                        <h3>Create New Task</h3>
+                        <h3>Create New Todo</h3>
                         <button type="button" class="x-btn">X</button>
                     </div>
-                    <div class="popup-task">
+                    <div class="popup-todo">
                         <form id="popup-form" class="form">
-                            <div class="task-divider">
+                            <div class="todo-divider">
                                 <input
                                     id="popup-title"
                                     type="text"
@@ -47,7 +47,7 @@
                                 class="description"
                                 placeholder="Description"
                             ></textarea>
-                            <div class="task-divider">
+                            <div class="todo-divider">
                                 <select id="popup-priority">
                                     <option value="">--Priority Level--</option>
                                     <option value="low">Low</option>
@@ -58,7 +58,7 @@
                                     <option value="">--Project--</option>
                                 </select>
                                 <button
-                                    id="create-task"
+                                    id="create-todo"
                                     type="button"
                                     class="secondary-btn"
                                 >
@@ -72,12 +72,12 @@
             <div class="edit-popup hide popup">
                 <div class="popup-container">
                     <div class="popup-header">
-                        <h3>Update Task</h3>
+                        <h3>Update todo</h3>
                         <button type="button" class="x-btn">X</button>
                     </div>
-                    <div class="popup-task">
+                    <div class="popup-todo">
                         <form id="edit-popup-form" class="form">
-                            <div class="task-divider">
+                            <div class="todo-divider">
                                 <input
                                     id="edit-popup-title"
                                     type="text"
@@ -90,7 +90,7 @@
                                 class="description"
                                 placeholder="Description"
                             ></textarea>
-                            <div class="task-divider">
+                            <div class="todo-divider">
                                 <select id="edit-popup-priority">
                                     <option value="">--Priority Level--</option>
                                     <option value="low">Low</option>
@@ -99,7 +99,7 @@
                                 </select>
 
                                 <button
-                                    id="edit-task"
+                                    id="edit-todo"
                                     type="button"
                                     class="secondary-btn"
                                 >
@@ -116,9 +116,9 @@
                         <h3>Create New Project</h3>
                         <button type="button" class="x-btn">X</button>
                     </div>
-                    <div class="popup-task">
+                    <div class="popup-todo">
                         <form id="popup-form" class="form">
-                            <div class="task-divider">
+                            <div class="todo-divider">
                                 <input
                                     id="project-popup-title"
                                     type="text"
@@ -131,7 +131,7 @@
                                 class="description"
                                 placeholder="Description"
                             ></textarea>
-                            <div class="task-divider">
+                            <div class="todo-divider">
                                 <!-- <select id="popup-priority">
                                     <option value="">--Priority Level--</option>
                                     <option value="low">Low</option>
@@ -164,7 +164,7 @@
                     </div>
                     <div class="row">
                         <div class="card">
-                            <div class="task-divider">
+                            <div class="todo-divider">
                                 <h3>Projects:</h3>
                                 <button id="new-project" class="secondary-btn">
                                     + Create New Project
@@ -188,6 +188,7 @@
                                     <td>Description</td>
                                     <td>Due Date</td>
                                     <td>Priority</td>
+                                    <td>Actions</td>
                                 </tr>
                             </th>
                             <tbody id="todo-table"></tbody>
@@ -195,13 +196,20 @@
                     </div>
                 </div>
                 <div class="project-page hide page">
-                    <div class="all-projects"></div>
+                    <div id="all-projects-section" class="all-projects"></div>
                     <div class="individual-project">
                         <header class="project-header">
-                            <input type="text" value="Project Title" />
-                            <textarea placeholder="Description"></textarea>
+                            <input
+                                id="project-title"
+                                type="text"
+                                placeholder="Project Title"
+                            />
+                            <textarea
+                                id="project-description"
+                                placeholder="Description"
+                            ></textarea>
                         </header>
-                        <table class="project-tasks"></table>
+                        <table class="project-todos"></table>
                     </div>
                 </div>
             </div>

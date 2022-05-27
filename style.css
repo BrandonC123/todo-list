@@ -19,24 +19,11 @@ input[type="text"],
 input[type="date"] {
     border: 1px solid rgb(233, 233, 233);
     border-radius: 5px;
-    font-size: 1.125em;
+    font-size: 1em;
 }
 
 input[type="text"] {
     width: 50%;
-}
-
-.overall-container {
-    display: flex;
-    height: 100vh;
-}
-
-.sidebar {
-    width: 20%;
-    max-width: 300px;
-    padding: 1em;
-    background-color: black;
-    color: white;
 }
 
 li a,
@@ -51,6 +38,27 @@ button a {
 li a:hover {
     font-size: 1.125em;
     color: lightgray;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+.overall-container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 20%;
+    max-width: 300px;
+    padding: 1em;
+    background-color: black;
+    color: white;
 }
 
 .sidebar-tabs li {
@@ -112,7 +120,7 @@ li a:hover {
     color: royalblue;
 }
 
-.popup-task {
+.popup-todo {
     margin-bottom: 8px;
     height: 70%;
     /* max-width: 700px; */
@@ -130,7 +138,7 @@ li a:hover {
     height: 100%;
 }
 
-.task-divider {
+.todo-divider {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -155,7 +163,7 @@ li a:hover {
     box-shadow: 0 0 5px rgb(146, 146, 146);
 }
 
-.task {
+.todo {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -175,6 +183,8 @@ li a:hover {
 }
 
 .action-btn {
+    font-size: .9em;
+    text-decoration: none;
     font-weight: bold;
     padding: 0.5em 2em;
     border: none;
