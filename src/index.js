@@ -19,13 +19,13 @@ const projectHandler = (() => {
             "project-popup-descr"
         ).value;
         const date = document.getElementById("project-popup-date").value;
-        let tasks = [];
+        let todos = [];
         projectCount++;
         const project = {
             title: title,
             description: description,
             dueDate: date,
-            tasks: tasks,
+            todos: todos,
             projectId: projectCount,
         };
         projectList.push(project);
@@ -33,25 +33,25 @@ const projectHandler = (() => {
         displayHandler.displayProject(project, projectList.length - 1);
         return project;
     }
-    function addTaskToProject(index, task) {
-        projectList[index].tasks.push(task);
+    function addtodoToProject(index, todo) {
+        projectList[index].todos.push(todo);
         localStorage.setItem("project-list", JSON.stringify(projectList));
     }
     return {
         createProject,
         projectList,
-        addTaskToProject,
+        addtodoToProject,
     };
 })();
 
-const taskHandler = (() => {
-    let taskList = [];
-    let taskCount = 0;
+const todoHandler = (() => {
+    let todoList = [];
+    let todoCount = 0;
     try {
-        console.log(JSON.parse(localStorage.getItem("task-list") || "[]"));
-        taskList = JSON.parse(localStorage.getItem("task-list") || "[]");
-        taskCount = localStorage.getItem("task-count");
-        // localStorage.removeItem("task-count");
+        console.log(JSON.parse(localStorage.getItem("todo-list") || "[]"));
+        todoList = JSON.parse(localStorage.getItem("todo-list") || "[]");
+        todoCount = localStorage.getItem("todo-count");
+        // localStorage.removeItem("todo-count");
     } catch (e) {
         console.log("empty");
     }
@@ -59,68 +59,68 @@ const taskHandler = (() => {
     let today = new Date()
         .toLocaleString("sv", { timeZoneName: "short" })
         .slice(0, 10);
-    function createTask() {
+    function createtodo() {
         const title = document.getElementById("popup-title").value;
         const description = document.getElementById("popup-descr").value;
         const date = document.getElementById("popup-date").value;
         const priority = document.getElementById("popup-priority").value;
         const projectIndex = document.getElementById("project-options").value;
-        taskCount++;
-        localStorage.setItem("task-count", taskCount);
-        console.log(taskCount);
-        const newTask = {
+        todoCount++;
+        localStorage.setItem("todo-count", todoCount);
+        console.log(todoCount);
+        const newTodo = {
             title: title,
             description: description,
             date: date,
             priority: priority,
-            taskId: taskCount,
+            todoId: todoCount,
         };
-        console.log(newTask);
+        console.log(newTodo);
         if (projectIndex === "") {
-            console.log("regular task");
-            return newTask;
+            console.log("regular todo");
+            return newTodo;
         } else {
-            projectHandler.addTaskToProject(projectIndex, newTask);
+            projectHandler.addtodoToProject(projectIndex, newTodo);
         }
     }
-    function editTask(id) {
+    function editTodo(id) {
         const title = document.getElementById("edit-popup-title").value;
         const description = document.getElementById("edit-popup-descr").value;
         const date = document.getElementById("edit-popup-date").value;
         const priority = document.getElementById("edit-popup-priority").value;
-        const updatedTask = {
+        const updatedtodo = {
             title: title,
             description: description,
             date: date,
             priority: priority,
-            taskId: getTaskById(id).taskObj.taskId,
+            todoId: getTodoById(id).todoObj.todoId,
         };
-        console.log(updatedTask);
-        const index = getTaskById(id).index;
-        taskList[index] = updatedTask;
+        console.log(updatedtodo);
+        const index = getTodoById(id).index;
+        todoList[index] = updatedtodo;
         displayHandler.togglePopUp("edit");
-        console.log(taskList);
-        localStorage.setItem("task-list", JSON.stringify(taskList));
+        console.log(todoList);
+        localStorage.setItem("todo-list", JSON.stringify(todoList));
         displayHandler.clearContainers();
-        displayHandler.displayAllTasks();
+        displayHandler.displayAlltodos();
     }
-    function getTaskById(id) {
-        for (let i = 0; i < taskList.length; i++) {
-            if (taskList[i].taskId == id) {
-                const task = {
-                    taskObj: taskList[i],
+    function getTodoById(id) {
+        for (let i = 0; i < todoList.length; i++) {
+            if (todoList[i].todoId == id) {
+                const todo = {
+                    todoObj: todoList[i],
                     index: i,
                 };
-                return task;
+                return todo;
             }
         }
     }
-    function deleteTask(index) {
-        taskList.splice(index, 1);
+    function deleteTodo(index) {
+        todoList.splice(index, 1);
         displayHandler.clearContainers();
-        localStorage.setItem("task-list", JSON.stringify(taskList));
-        displayHandler.displayAllTasks();
-        console.log(taskList);
+        localStorage.setItem("todo-list", JSON.stringify(todoList));
+        displayHandler.displayAlltodos();
+        console.log(todoList);
     }
     function getUpcoming(inputDate) {
         let today = new Date();
@@ -129,13 +129,13 @@ const taskHandler = (() => {
         return result <= 7 && result >= 0 ? true : false;
     }
     return {
-        createTask,
-        taskList,
-        taskCount,
+        createtodo,
+        todoList,
+        todoCount,
         today,
-        getTaskById,
-        editTask,
-        deleteTask,
+        getTodoById,
+        editTodo,
+        deleteTodo,
         getUpcoming,
     };
 })();
@@ -158,91 +158,106 @@ const displayHandler = (() => {
             document.querySelector(".project-popup").classList.add("hide");
         }
     }
-    function displayTask(inputTask, container, newTask) {
-        let taskId = inputTask.taskId;
-        const task = document.createElement("div");
-        task.classList.add("task");
+    function displayTodo(inputTodo, container, newTodo) {
+        let todoId = inputTodo.todoId;
+        const todo = document.createElement("div");
+        todo.classList.add("todo");
 
         const checkBox = document.createElement("input");
         checkBox.type = "checkbox";
 
-        const taskTitle = document.createElement("input");
-        taskTitle.type = "text";
-        taskTitle.placeholder = "Title";
-        taskTitle.value = inputTask.title;
+        const todoTitle = document.createElement("input");
+        todoTitle.type = "text";
+        todoTitle.placeholder = "Title";
+        todoTitle.value = inputTodo.title;
 
         const calendar = document.createElement("input");
         calendar.type = "date";
-        calendar.value = inputTask.date;
+        calendar.value = inputTodo.date;
 
         const prioritySquare = document.createElement("div");
         prioritySquare.classList.add("priority-square");
         prioritySquare.style.backgroundColor = getPriorityColor(
-            inputTask.priority.toString()
+            inputTodo.priority.toString()
         );
 
         const edit = document.createElement("a");
         edit.classList.add("accent-text");
-        edit.classList.add("edit-" + taskId);
+        edit.classList.add("edit-" + todoId);
         edit.textContent = "Edit";
         edit.href = "#";
 
         const deleteBtn = document.createElement("a");
         deleteBtn.classList.add("danger-text");
-        deleteBtn.classList.add("delete-" + taskId);
+        deleteBtn.classList.add("delete-" + todoId);
         deleteBtn.textContent = "Delete";
         deleteBtn.href = "#";
 
-        task.appendChild(checkBox);
-        task.appendChild(taskTitle);
-        task.appendChild(calendar);
-        task.appendChild(prioritySquare);
-        task.appendChild(edit);
-        task.appendChild(deleteBtn);
-        if (inputTask.date.toString() === taskHandler.today.toString()) {
+        todo.appendChild(checkBox);
+        todo.appendChild(todoTitle);
+        todo.appendChild(calendar);
+        todo.appendChild(prioritySquare);
+        todo.appendChild(edit);
+        todo.appendChild(deleteBtn);
+        if (inputTodo.date.toString() === todoHandler.today.toString()) {
             document
                 .querySelector("#today-container")
-                .appendChild(task.cloneNode(true));
+                .appendChild(todo.cloneNode(true));
         }
-        if (taskHandler.getUpcoming(inputTask.date)) {
+        if (todoHandler.getUpcoming(inputTodo.date)) {
             document
                 .querySelector(".upcoming")
-                .appendChild(task.cloneNode(true));
+                .appendChild(todo.cloneNode(true));
         }
-        if (container === ".all-todos" || newTask) {
+        if (container === ".all-todos" || newTodo) {
             const todoContainers = document.querySelectorAll(".all-todos");
             todoContainers.forEach((todoContainer) => {
-                todoContainer.appendChild(task.cloneNode(true));
+                todoContainer.appendChild(todo.cloneNode(true));
             });
         }
-        const editBtns = document.querySelectorAll(".edit-" + taskId);
+        const editBtns = document.querySelectorAll(".edit-" + todoId);
         editBtns.forEach((btn) => {
             btn.addEventListener("click", function () {
-                fillEditPopup(taskId);
+                fillEditPopup(todoId);
             });
         });
-        const deleteBtns = document.querySelectorAll(".delete-" + taskId);
+        const deleteBtns = document.querySelectorAll(".delete-" + todoId);
         deleteBtns.forEach((btn) => {
             btn.addEventListener("click", function () {
-                taskHandler.deleteTask(taskHandler.getTaskById(taskId).index);
+                todoHandler.deleteTodo(todoHandler.getTodoById(todoId).index);
             });
         });
     }
     function fillEditPopup(id) {
-        const task = taskHandler.getTaskById(id).taskObj;
-        console.log(taskHandler.getTaskById(id));
-        activeId = task.taskId;
+        const todo = todoHandler.getTodoById(id).todoObj;
+        console.log(todoHandler.getTodoById(id));
+        activeId = todo.todoId;
         document.querySelector(".edit-popup").classList.toggle("hide");
-        document.getElementById("edit-popup-title").value = task.title;
-        document.getElementById("edit-popup-date").value = task.date;
-        document.getElementById("edit-popup-descr").value = task.description;
-        document.getElementById("edit-popup-priority").value = task.priority;
+        document.getElementById("edit-popup-title").value = todo.title;
+        document.getElementById("edit-popup-date").value = todo.date;
+        document.getElementById("edit-popup-descr").value = todo.description;
+        document.getElementById("edit-popup-priority").value = todo.priority;
     }
-    function displayAllTasks() {
-        taskHandler.taskList.forEach((element) => {
-            displayTask(element, ".all-todos");
+    function displayAlltodos() {
+        todoHandler.todoList.forEach((element) => {
+            displayTodo(element, ".all-todos");
         });
-        console.log(taskHandler.taskCount);
+        console.log(todoHandler.todoCount);
+    }
+    function fillTodoTable() {
+        const table = document.getElementById("todo-table");
+        table.innerHTML = "";
+        todoHandler.todoList.forEach((todo) => {
+            let row = table.insertRow();
+            let title = row.insertCell(0);
+            title.innerHTML = todo.title;
+            let description = row.insertCell(1);
+            description.innerHTML = todo.description;
+            let date = row.insertCell(2);
+            date.innerHTML = todo.date;
+            let priority = row.insertCell(3);
+            priority.innerHTML = todo.priority;
+        });
     }
     function clearContainers() {
         const todoContainers = document.querySelectorAll(".all-todos");
@@ -264,7 +279,9 @@ const displayHandler = (() => {
     }
     function fillProjectDropdown() {
         const dropdown = document.getElementById("project-options");
+        dropdown.innerHTML = "";
         let projectList = projectHandler.projectList;
+
         for (let i = 0; i < projectList.length; i++) {
             const option = document.createElement("option");
             option.value = i;
@@ -297,7 +314,7 @@ const displayHandler = (() => {
         );
         projectLinks.forEach((link) => {
             link.addEventListener("click", function () {
-                displayProjectTasks(index);
+                displayProjectTodos(index);
             });
         });
     }
@@ -307,11 +324,31 @@ const displayHandler = (() => {
             displayProject(projects[i], i);
         }
     }
-    function displayProjectTasks(index) {
-        const projecTaskContainer = document.querySelector(".project-tasks");
-        const projectTasks = projectHandler.projectList[index].tasks;
-        for (let i = 0; i < projectTasks.length; i++) {
-            console.log(projectTasks[i]);
+    function displayProjectTodos(index) {
+        const pages = document.querySelectorAll(".page");
+        const projectList = projectHandler.projectList;
+
+        pages.forEach((page) => {
+            if (page.classList.contains("project-page")) {
+                page.classList.remove("hide");
+            } else {
+                page.classList.add("hide");
+            }
+        });
+
+        document.getElementById("all-projects-section").classList.add("hide");
+        document.querySelector(".individual-project").classList.remove("hide")
+        const projectTitle = document.getElementById("project-title");
+        projectTitle.value = projectList[index].title;
+        const projectDescription = document.getElementById(
+            "project-description"
+        );
+        projectDescription.value = projectList[index].description;
+
+        const projectTodoContainer = document.querySelector(".project-todos");
+        const projectTodos = projectHandler.projectList[index].todos;
+        for (let i = 0; i < projectTodos.length; i++) {
+            console.log(projectTodos[i]);
         }
     }
     const closeBtns = document.querySelectorAll(".x-btn");
@@ -327,22 +364,22 @@ const displayHandler = (() => {
             fillProjectDropdown();
         });
     document
-        .getElementById("create-task")
+        .getElementById("create-todo")
         .addEventListener("click", function () {
-            let newTask = taskHandler.createTask();
-            if (newTask != null) {
-                displayHandler.displayTask(newTask, ".all-todos", true);
-                taskHandler.taskList.push(newTask);
+            let newTodo = todoHandler.createtodo();
+            if (newTodo != null) {
+                displayHandler.displayTodo(newTodo, ".all-todos", true);
+                todoHandler.todoList.push(newTodo);
                 localStorage.setItem(
-                    "task-list",
-                    JSON.stringify(taskHandler.taskList)
+                    "todo-list",
+                    JSON.stringify(todoHandler.todoList)
                 );
             }
             displayHandler.togglePopUp("close");
             document.getElementById("popup-form").reset();
         });
-    document.getElementById("edit-task").onclick = function () {
-        taskHandler.editTask(activeId);
+    document.getElementById("edit-todo").onclick = function () {
+        todoHandler.editTodo(activeId);
     };
     document
         .getElementById("new-project")
@@ -365,18 +402,29 @@ const displayHandler = (() => {
             for (let i = 0; i < tabs.length; i++) {
                 if (tab === tabs[i]) {
                     pages[i].classList.remove("hide");
+                    if (pages[i].classList.contains("todo-page")) {
+                        fillTodoTable();
+                    }
+                    if (pages[i].classList.contains("project-page")) {
+                        document
+                            .getElementById("all-projects-section")
+                            .classList.remove("hide");
+                        document
+                            .querySelector(".individual-project")
+                            .classList.add("hide");
+                    }
                 } else {
                     pages[i].classList.add("hide");
                 }
             }
         });
     });
-    displayAllTasks();
+    displayAlltodos();
     displayAllProjects();
     return {
         togglePopUp,
-        displayTask,
-        displayAllTasks,
+        displayTodo,
+        displayAlltodos,
         clearContainers,
         displayProject,
     };
