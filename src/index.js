@@ -82,9 +82,9 @@ const taskHandler = (() => {
             taskId: taskCount,
         };
         console.log(newTask);
-        console.log(projectIndex)
+        console.log(projectIndex);
         if (projectIndex === "") {
-            console.log("regular task")
+            console.log("regular task");
             return newTask;
         } else {
             projectHandler.addTaskToProject(projectIndex, newTask);
@@ -281,6 +281,32 @@ const displayHandler = (() => {
             dropdown.appendChild(option);
         }
     }
+    function displayProject(inputProject, projectId) {
+        const projectDiv = document.createElement("div");
+        const a = document.createElement("a");
+        projectDiv.classList.add("project-row");
+        a.href = "#";
+        a.textContent = inputProject.title;
+
+        // const deleteBtn = document.createElement("a");
+        // deleteBtn.classList.add("danger-text");
+        // deleteBtn.classList.add("delete-project-" + index);
+        // deleteBtn.textContent = "Delete";
+        // deleteBtn.href = "#";
+
+        projectDiv.appendChild(a);
+        // projectDiv.appendChild(deleteBtn)
+        const projectContainers = document.querySelectorAll(".all-projects");
+        projectContainers.forEach((projectContainer) => {
+            projectContainer.appendChild(projectDiv.cloneNode(true));
+        });
+    }
+    function displayAllProjects() {
+        const projects = projectHandler.projectList;
+        for (let i = 0; i < projects.length; i++) {
+            displayProject(projects[i], projects[i].projectId);
+        }
+    }
     const closeBtns = document.querySelectorAll(".x-btn");
     closeBtns.forEach((btn) => {
         btn.addEventListener("click", function () {
@@ -321,15 +347,23 @@ const displayHandler = (() => {
             projectTitle.textContent = projectHandler.createProject().title;
             document.querySelector(".project-tab").appendChild(projectTitle);
         });
-    document.getElementById("todo-page-btn").onclick = function () {
-        document.querySelector(".home-page").classList.add("hide");
-        document.querySelector(".todo-page").classList.remove("hide");
-    };
-    document.getElementById("home-page-btn").onclick = function () {
-        document.querySelector(".todo-page").classList.add("hide");
-        document.querySelector(".home-page").classList.remove("hide");
-    };
+
+    const tabs = document.querySelectorAll(".tab");
+    const pages = document.querySelectorAll(".page");
+    tabs.forEach((tab) => {
+        tab.addEventListener("click", function () {
+            for (let i = 0; i < tabs.length; i++) {
+                console.log(pages[i])
+                if (tab === tabs[i]) {
+                    pages[i].classList.remove("hide")
+                } else {
+                    pages[i].classList.add("hide")
+                }
+            }
+        });
+    });
     displayAllTasks();
+    displayAllProjects();
     return {
         togglePopUp,
         displayTask,

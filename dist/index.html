@@ -22,10 +22,7 @@
                     </li>
                     <li>
                         <a class="tab" href="#">Projects</a>
-                        <ul class="project-container">
-                            <li>Home reno</li>
-                            <li>Test</li>
-                        </ul>
+                        <ul class="project-tab all-projects"></ul>
                     </li>
                 </ul>
             </div>
@@ -56,6 +53,9 @@
                                     <option value="low">Low</option>
                                     <option value="med">Medium</option>
                                     <option value="high">High</option>
+                                </select>
+                                <select id="project-options">
+                                    <option value="">--Project--</option>
                                 </select>
                                 <button
                                     id="create-task"
@@ -110,22 +110,52 @@
                     </div>
                 </div>
             </div>
+            <div class="project-popup popup hide">
+                <div class="popup-container">
+                    <div class="popup-header">
+                        <h3>Create New Project</h3>
+                        <button type="button" class="x-btn">X</button>
+                    </div>
+                    <div class="popup-task">
+                        <form id="popup-form" class="form">
+                            <div class="task-divider">
+                                <input
+                                    id="project-popup-title"
+                                    type="text"
+                                    placeholder="Title"
+                                />
+                                <input id="project-popup-date" type="date" />
+                            </div>
+                            <textarea
+                                id="project-popup-descr"
+                                class="description"
+                                placeholder="Description"
+                            ></textarea>
+                            <div class="task-divider">
+                                <!-- <select id="popup-priority">
+                                    <option value="">--Priority Level--</option>
+                                    <option value="low">Low</option>
+                                    <option value="med">Medium</option>
+                                    <option value="high">High</option>
+                                </select> -->
+                                <button
+                                    id="create-project"
+                                    type="button"
+                                    class="secondary-btn"
+                                >
+                                    Create
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
             <div class="content-container">
-                <div class="home-page">
+                <div class="home-page page">
                     <div class="row">
                         <div id="today-card" class="card">
                             <h3>Today:</h3>
-                            <div id="today-container">
-                                <!-- <div class="task">
-                                    <input
-                                        type="text"
-                                        value="Comp Sci Assignment"
-                                    />
-                                    <input type="date" />
-                                    <div class="priority-square"></div>
-                                    <a class="accent-text" href="#">Edit</a>
-                                </div> -->
-                            </div>
+                            <div id="today-container"></div>
                         </div>
                         <div class="card">
                             <h3>Upcoming:</h3>
@@ -136,10 +166,11 @@
                         <div class="card">
                             <div class="task-divider">
                                 <h3>Projects:</h3>
-                                <button id="create-project" class="secondary-btn">
+                                <button id="new-project" class="secondary-btn">
                                     + Create New Project
                                 </button>
                             </div>
+                            <div class="all-projects"></div>
                         </div>
                         <div class="card">
                             <h3>All ToDos:</h3>
@@ -147,8 +178,31 @@
                         </div>
                     </div>
                 </div>
-                <div class="todo-page hide">
-                    <div class="all-todos"></div>
+                <div class="inbox-page hide page"></div>
+                <div class="todo-page hide page">
+                    <div class="all-todos">
+                        <table>
+                            <th>
+                                <tr>
+                                    <td>Title</td>
+                                    <td>Description</td>
+                                    <td>Due Date</td>
+                                    <td>Priority</td>
+                                </tr>
+                            </th>
+                            <tbody id="todo-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="project-page hide page">
+                    <div class="all-projects"></div>
+                    <div class="individual-project">
+                        <header class="project-header">
+                            <input type="text" value="Project Title" />
+                            <textarea placeholder="Description"></textarea>
+                        </header>
+                        <table class="project-tasks"></table>
+                    </div>
                 </div>
             </div>
         </div>
