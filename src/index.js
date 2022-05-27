@@ -5,7 +5,7 @@ const projectHandler = (() => {
     try {
         console.log(JSON.parse(localStorage.getItem("project-list") || "[]"));
         projectList = JSON.parse(localStorage.getItem("project-list") || "[]");
-        // localStorage.removeItem("task-list");
+        // localStorage.removeItem("project-list");
     } catch (e) {
         console.log("empty");
     }
@@ -19,15 +19,7 @@ const projectHandler = (() => {
             "project-popup-descr"
         ).value;
         const date = document.getElementById("project-popup-date").value;
-        let tasks = [
-            {
-                title: "task title",
-                description: "des",
-                date: "2022-05-28",
-                priority: "high",
-                taskId: 2,
-            },
-        ];
+        let tasks = [];
         projectCount++;
         const project = {
             title: title,
@@ -38,6 +30,7 @@ const projectHandler = (() => {
         };
         projectList.push(project);
         localStorage.setItem("project-list", JSON.stringify(projectList));
+        displayHandler.displayProject(project, projectList.length - 1);
         return project;
     }
     function addTaskToProject(index, task) {
@@ -53,17 +46,16 @@ const projectHandler = (() => {
 
 const taskHandler = (() => {
     let taskList = [];
+    let taskCount = 0;
     try {
         console.log(JSON.parse(localStorage.getItem("task-list") || "[]"));
         taskList = JSON.parse(localStorage.getItem("task-list") || "[]");
-        // localStorage.removeItem("task-list");
+        taskCount = localStorage.getItem("task-count");
+        // localStorage.removeItem("task-count");
     } catch (e) {
         console.log("empty");
     }
-    let taskCount =
-        taskList.length != 0
-            ? JSON.parse(taskList[taskList.length - 1].taskId)
-            : 0;
+
     let today = new Date()
         .toLocaleString("sv", { timeZoneName: "short" })
         .slice(0, 10);
@@ -74,6 +66,8 @@ const taskHandler = (() => {
         const priority = document.getElementById("popup-priority").value;
         const projectIndex = document.getElementById("project-options").value;
         taskCount++;
+        localStorage.setItem("task-count", taskCount);
+        console.log(taskCount);
         const newTask = {
             title: title,
             description: description,
@@ -82,7 +76,6 @@ const taskHandler = (() => {
             taskId: taskCount,
         };
         console.log(newTask);
-        console.log(projectIndex);
         if (projectIndex === "") {
             console.log("regular task");
             return newTask;
@@ -247,9 +240,9 @@ const displayHandler = (() => {
     }
     function displayAllTasks() {
         taskHandler.taskList.forEach((element) => {
-            taskHandler.taskCount++;
             displayTask(element, ".all-todos");
         });
+        console.log(taskHandler.taskCount);
     }
     function clearContainers() {
         const todoContainers = document.querySelectorAll(".all-todos");
@@ -272,19 +265,18 @@ const displayHandler = (() => {
     function fillProjectDropdown() {
         const dropdown = document.getElementById("project-options");
         let projectList = projectHandler.projectList;
-        console.log(projectList);
         for (let i = 0; i < projectList.length; i++) {
             const option = document.createElement("option");
             option.value = i;
             option.text = projectList[i].title;
-            console.log(option);
             dropdown.appendChild(option);
         }
     }
-    function displayProject(inputProject, projectId) {
+    function displayProject(inputProject, index) {
         const projectDiv = document.createElement("div");
-        const a = document.createElement("a");
         projectDiv.classList.add("project-row");
+        const a = document.createElement("a");
+        a.classList.add("project-link-" + index);
         a.href = "#";
         a.textContent = inputProject.title;
 
@@ -300,11 +292,26 @@ const displayHandler = (() => {
         projectContainers.forEach((projectContainer) => {
             projectContainer.appendChild(projectDiv.cloneNode(true));
         });
+        const projectLinks = document.querySelectorAll(
+            ".project-link-" + index
+        );
+        projectLinks.forEach((link) => {
+            link.addEventListener("click", function () {
+                displayProjectTasks(index);
+            });
+        });
     }
     function displayAllProjects() {
         const projects = projectHandler.projectList;
         for (let i = 0; i < projects.length; i++) {
-            displayProject(projects[i], projects[i].projectId);
+            displayProject(projects[i], i);
+        }
+    }
+    function displayProjectTasks(index) {
+        const projecTaskContainer = document.querySelector(".project-tasks");
+        const projectTasks = projectHandler.projectList[index].tasks;
+        for (let i = 0; i < projectTasks.length; i++) {
+            console.log(projectTasks[i]);
         }
     }
     const closeBtns = document.querySelectorAll(".x-btn");
@@ -319,19 +326,21 @@ const displayHandler = (() => {
             togglePopUp("create");
             fillProjectDropdown();
         });
-    document.getElementById("create-task").onclick = function () {
-        let newTask = taskHandler.createTask();
-        if (newTask != null) {
-            displayHandler.displayTask(newTask, ".all-todos", true);
-            taskHandler.taskList.push(newTask);
-            displayHandler.togglePopUp("create");
-            localStorage.setItem(
-                "task-list",
-                JSON.stringify(taskHandler.taskList)
-            );
-        }
-        document.getElementById("popup-form").reset();
-    };
+    document
+        .getElementById("create-task")
+        .addEventListener("click", function () {
+            let newTask = taskHandler.createTask();
+            if (newTask != null) {
+                displayHandler.displayTask(newTask, ".all-todos", true);
+                taskHandler.taskList.push(newTask);
+                localStorage.setItem(
+                    "task-list",
+                    JSON.stringify(taskHandler.taskList)
+                );
+            }
+            displayHandler.togglePopUp("close");
+            document.getElementById("popup-form").reset();
+        });
     document.getElementById("edit-task").onclick = function () {
         taskHandler.editTask(activeId);
     };
@@ -346,6 +355,7 @@ const displayHandler = (() => {
             const projectTitle = document.createElement("li");
             projectTitle.textContent = projectHandler.createProject().title;
             document.querySelector(".project-tab").appendChild(projectTitle);
+            togglePopUp("close");
         });
 
     const tabs = document.querySelectorAll(".tab");
@@ -353,11 +363,10 @@ const displayHandler = (() => {
     tabs.forEach((tab) => {
         tab.addEventListener("click", function () {
             for (let i = 0; i < tabs.length; i++) {
-                console.log(pages[i])
                 if (tab === tabs[i]) {
-                    pages[i].classList.remove("hide")
+                    pages[i].classList.remove("hide");
                 } else {
-                    pages[i].classList.add("hide")
+                    pages[i].classList.add("hide");
                 }
             }
         });
@@ -369,5 +378,6 @@ const displayHandler = (() => {
         displayTask,
         displayAllTasks,
         clearContainers,
+        displayProject,
     };
 })();
