@@ -7,7 +7,8 @@ body {
     font-family: "Roboto", sans-serif;
 }
 
-input, textarea {
+input,
+textarea {
     font-family: "Roboto", sans-serif;
 }
 
@@ -44,8 +45,23 @@ table {
     border-collapse: collapse;
 }
 
-table, th, td {
+table,
+thead {
     border: 1px solid black;
+    padding: 0.5em;
+}
+
+td {
+    padding: 0.5em;
+}
+
+td:nth-child(2) {
+    width: 50%;
+    max-width: 700px;
+}
+
+tr:nth-child(even) {
+    background-color: rgb(241, 241, 241);
 }
 
 .overall-container {
@@ -74,6 +90,10 @@ table, th, td {
 .content-container {
     width: 100%;
     padding: 3em;
+}
+
+.page {
+    height: 100%;
 }
 
 .home-page {
@@ -166,6 +186,7 @@ table, th, td {
 .todo {
     display: flex;
     justify-content: space-between;
+    gap: 5px;
     align-items: center;
     margin-bottom: 8px;
     max-width: 700px;
@@ -175,28 +196,40 @@ table, th, td {
     padding: 0.2em;
 }
 
+.individual-project {
+    height: 100%;
+}
+
+.project-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 30%;
+}
+
 .priority-square {
     width: 30px;
     height: 30px;
     border: 5px solid gray;
-    opacity: .75;
+    opacity: 0.75;
 }
 
-.action-btn {
-    font-size: .9em;
+.action-btn,
+.secondary-btn {
+    font-size: 0.9em;
     text-decoration: none;
     font-weight: bold;
     padding: 0.5em 2em;
-    border: none;
     border-radius: 100px;
+}
+
+.action-btn {
+    border: none;
     background-color: royalblue;
     color: white;
 }
 
 .secondary-btn {
-    font-weight: bold;
-    padding: 0.5em 2em;
-    border: none;
     border: 2px solid royalblue;
     border-radius: 100px;
     background-color: white;
@@ -226,6 +259,7 @@ table, th, td {
 .x-btn {
     font-weight: bold;
     background-color: rgb(252, 58, 58);
+    text-decoration: none;
 }
 
 .check-btn:hover,

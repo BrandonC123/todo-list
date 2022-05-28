@@ -30,7 +30,7 @@
                 <div class="popup-container">
                     <div class="popup-header">
                         <h3>Create New Todo</h3>
-                        <button type="button" class="x-btn">X</button>
+                        <a href="#" class="x-btn">X</a>
                     </div>
                     <div class="popup-todo">
                         <form id="popup-form" class="form">
@@ -54,16 +54,15 @@
                                     <option value="med">Medium</option>
                                     <option value="high">High</option>
                                 </select>
-                                <select id="project-options">
-                                    <option value="">--Project--</option>
-                                </select>
-                                <button
+                                <select id="project-options"></select>
+                                <a
                                     id="create-todo"
                                     type="button"
                                     class="secondary-btn"
+                                    href="#"
                                 >
                                     Create
-                                </button>
+                                </a>
                             </div>
                         </form>
                     </div>
@@ -72,8 +71,8 @@
             <div class="edit-popup hide popup">
                 <div class="popup-container">
                     <div class="popup-header">
-                        <h3>Update todo</h3>
-                        <button type="button" class="x-btn">X</button>
+                        <h3>Update ToDo</h3>
+                        <a href="#" class="x-btn">X</a>
                     </div>
                     <div class="popup-todo">
                         <form id="edit-popup-form" class="form">
@@ -98,13 +97,13 @@
                                     <option value="high">High</option>
                                 </select>
 
-                                <button
+                                <a
                                     id="edit-todo"
-                                    type="button"
                                     class="secondary-btn"
+                                    href="#"
                                 >
                                     Update
-                                </button>
+                                </a>
                             </div>
                         </form>
                     </div>
@@ -114,7 +113,7 @@
                 <div class="popup-container">
                     <div class="popup-header">
                         <h3>Create New Project</h3>
-                        <button type="button" class="x-btn">X</button>
+                        <a href="#" class="x-btn">X</a>
                     </div>
                     <div class="popup-todo">
                         <form id="popup-form" class="form">
@@ -132,19 +131,13 @@
                                 placeholder="Description"
                             ></textarea>
                             <div class="todo-divider">
-                                <!-- <select id="popup-priority">
-                                    <option value="">--Priority Level--</option>
-                                    <option value="low">Low</option>
-                                    <option value="med">Medium</option>
-                                    <option value="high">High</option>
-                                </select> -->
-                                <button
+                                <a
                                     id="create-project"
-                                    type="button"
                                     class="secondary-btn"
+                                    href="#"
                                 >
                                     Create
-                                </button>
+                                </a>
                             </div>
                         </form>
                     </div>
@@ -166,9 +159,13 @@
                         <div class="card">
                             <div class="todo-divider">
                                 <h3>Projects:</h3>
-                                <button id="new-project" class="secondary-btn">
+                                <a
+                                    id="new-project"
+                                    class="secondary-btn"
+                                    href="#"
+                                >
                                     + Create New Project
-                                </button>
+                                </a>
                             </div>
                             <div class="all-projects"></div>
                         </div>
@@ -180,17 +177,16 @@
                 </div>
                 <div class="inbox-page hide page"></div>
                 <div class="todo-page hide page">
-                    <div class="all-todos">
+                    <h2>All ToDos:</h2>
+                    <div>
                         <table>
-                            <th>
-                                <tr>
-                                    <td>Title</td>
-                                    <td>Description</td>
-                                    <td>Due Date</td>
-                                    <td>Priority</td>
-                                    <td>Actions</td>
-                                </tr>
-                            </th>
+                            <thead>
+                                <td>Title</td>
+                                <td>Description</td>
+                                <td>Due Date</td>
+                                <td>Priority</td>
+                                <td>Actions</td>
+                            </thead>
                             <tbody id="todo-table"></tbody>
                         </table>
                     </div>
@@ -206,10 +202,20 @@
                             />
                             <textarea
                                 id="project-description"
+                                class="description"
                                 placeholder="Description"
                             ></textarea>
                         </header>
-                        <table class="project-todos"></table>
+                        <table class="project-todos">
+                            <thead>
+                                <td>Title</td>
+                                <td>Description</td>
+                                <td>Due Date</td>
+                                <td>Priority</td>
+                                <td>Actions</td>
+                            </thead>
+                            <tbody id="project-todo-table"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
