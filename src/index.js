@@ -59,7 +59,7 @@ const todoHandler = (() => {
     let today = new Date()
         .toLocaleString("sv", { timeZoneName: "short" })
         .slice(0, 10);
-    function createtodo() {
+    function createTodo() {
         const title = document.getElementById("popup-title").value;
         const description = document.getElementById("popup-descr").value;
         const date = document.getElementById("popup-date").value;
@@ -73,6 +73,7 @@ const todoHandler = (() => {
             description: description,
             date: date,
             priority: priority,
+            finished: false,
             todoId: todoCount,
         };
         console.log(newTodo);
@@ -93,6 +94,7 @@ const todoHandler = (() => {
             description: description,
             date: date,
             priority: priority,
+            finished: getTodoById(id).todoObj.finished,
             todoId: getTodoById(id).todoObj.todoId,
         };
         console.log(updatedtodo);
@@ -129,7 +131,7 @@ const todoHandler = (() => {
         return result <= 7 && result >= 0 ? true : false;
     }
     return {
-        createtodo,
+        createTodo,
         todoList,
         todoCount,
         today,
@@ -159,12 +161,16 @@ const displayHandler = (() => {
         }
     }
     function displayTodo(inputTodo, container, newTodo) {
-        let todoId = inputTodo.todoId;
+        const todoId = inputTodo.todoId;
+        console.log(todoHandler.todoList);
+        const index = todoHandler.getTodoById(todoId).index;
         const todo = document.createElement("div");
         todo.classList.add("todo");
 
         const checkBox = document.createElement("input");
+        checkBox.classList.add("todo-checkbox-" + todoId);
         checkBox.type = "checkbox";
+        checkBox.checked = inputTodo.finished ? true : false;
 
         const todoTitle = document.createElement("input");
         todoTitle.type = "text";
@@ -224,7 +230,22 @@ const displayHandler = (() => {
         const deleteBtns = document.querySelectorAll(".delete-" + todoId);
         deleteBtns.forEach((btn) => {
             btn.addEventListener("click", function () {
-                todoHandler.deleteTodo(todoHandler.getTodoById(todoId).index);
+                todoHandler.deleteTodo(index);
+            });
+        });
+        const checkBoxes = document.querySelectorAll(
+            ".todo-checkbox-" + todoId
+        );
+        checkBoxes.forEach((check) => {
+            check.addEventListener("change", function () {
+                todoHandler.todoList[index].finished = document.querySelector(
+                    ".todo-checkbox-" + todoId
+                ).checked;
+                localStorage.setItem(
+                    "todo-list",
+                    JSON.stringify(todoHandler.todoList)
+                );
+                console.log(todoHandler.todoList[index]);
             });
         });
     }
@@ -337,7 +358,7 @@ const displayHandler = (() => {
         });
 
         document.getElementById("all-projects-section").classList.add("hide");
-        document.querySelector(".individual-project").classList.remove("hide")
+        document.querySelector(".individual-project").classList.remove("hide");
         const projectTitle = document.getElementById("project-title");
         projectTitle.value = projectList[index].title;
         const projectDescription = document.getElementById(
@@ -347,9 +368,22 @@ const displayHandler = (() => {
 
         const projectTodoContainer = document.querySelector(".project-todos");
         const projectTodos = projectHandler.projectList[index].todos;
-        for (let i = 0; i < projectTodos.length; i++) {
-            console.log(projectTodos[i]);
-        }
+        // for (let i = 0; i < projectTodos.length; i++) {
+        //     console.log(projectTodos[i]);
+        // }
+        const table = document.getElementById("project-todo-table");
+        table.innerHTML = "";
+        projectTodos.forEach((todo) => {
+            let row = table.insertRow();
+            let title = row.insertCell(0);
+            title.innerHTML = todo.title;
+            let description = row.insertCell(1);
+            description.innerHTML = todo.description;
+            let date = row.insertCell(2);
+            date.innerHTML = todo.date;
+            let priority = row.insertCell(3);
+            priority.innerHTML = todo.priority;
+        });
     }
     const closeBtns = document.querySelectorAll(".x-btn");
     closeBtns.forEach((btn) => {
@@ -366,10 +400,10 @@ const displayHandler = (() => {
     document
         .getElementById("create-todo")
         .addEventListener("click", function () {
-            let newTodo = todoHandler.createtodo();
+            let newTodo = todoHandler.createTodo();
             if (newTodo != null) {
-                displayHandler.displayTodo(newTodo, ".all-todos", true);
                 todoHandler.todoList.push(newTodo);
+                displayHandler.displayTodo(newTodo, ".all-todos", true);
                 localStorage.setItem(
                     "todo-list",
                     JSON.stringify(todoHandler.todoList)
