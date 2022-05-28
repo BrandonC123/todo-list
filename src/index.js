@@ -134,7 +134,6 @@ const todoHandler = (() => {
         todoList.splice(index, 1);
         displayHandler.clearContainers();
         localStorage.setItem("todo-list", JSON.stringify(todoList));
-        displayHandler.displayAllTodos();
         console.log(todoList);
     }
     function getUpcoming(inputDate) {
@@ -276,22 +275,35 @@ const displayHandler = (() => {
         todoHandler.todoList.forEach((element) => {
             displayTodo(element, ".all-todos");
         });
-        console.log(todoHandler.todoCount);
+        fillTodoTable();
     }
     function fillTodoTable() {
         const table = document.getElementById("todo-table");
-        table.innerHTML = "";
-        todoHandler.todoList.forEach((todo) => {
+        if (table !== null) {
+            table.innerHTML = "";
+        }
+        const todoList = todoHandler.todoList;
+        for (let i = 0; i < todoList.length; i++) {
             let row = table.insertRow();
             let title = row.insertCell(0);
-            title.innerHTML = todo.title;
+            title.innerHTML = todoList[i].title;
             let description = row.insertCell(1);
-            description.innerHTML = todo.description;
+            description.innerHTML = todoList[i].description;
             let date = row.insertCell(2);
-            date.innerHTML = todo.date;
+            date.innerHTML = todoList[i].date;
             let priority = row.insertCell(3);
-            priority.innerHTML = todo.priority;
-        });
+            priority.innerHTML = todoList[i].priority;
+            let actions = row.insertCell(4);
+            const deleteBtn = document.createElement("a");
+            deleteBtn.classList.add("danger-text");
+            deleteBtn.classList.add("delete-");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.href = "#";
+            deleteBtn.addEventListener("click", function () {
+                todoHandler.deleteTodo(i);
+            });
+            actions.appendChild(deleteBtn);
+        }
     }
     function clearContainers() {
         const todoContainers = document.querySelectorAll(".all-todos");
@@ -304,6 +316,8 @@ const displayHandler = (() => {
         });
         document.getElementById("today-container").innerHTML = "";
         document.querySelector(".upcoming").innerHTML = "";
+        displayAllTodos();
+        displayAllProjects();
     }
     function getPriorityColor(priority) {
         if (priority === "high") {
@@ -350,6 +364,7 @@ const displayHandler = (() => {
         const projectContainers = document.querySelectorAll(".all-projects");
         projectContainers.forEach((projectContainer) => {
             if (!projectContainer.classList.contains("project-tab")) {
+                projectDiv.classList.add("todo");
                 projectDiv.appendChild(deleteBtn);
             }
             projectContainer.appendChild(projectDiv.cloneNode(true));
