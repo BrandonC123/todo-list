@@ -14,7 +14,10 @@ const projectHandler = (() => {
             ? JSON.parse(projectList[projectList.length - 1].projectId)
             : 0;
     function createProject() {
-        const title = document.getElementById("project-popup-title").value;
+        const title =
+            document.getElementById("project-popup-title").value === ""
+                ? "Untitled Project"
+                : document.getElementById("project-popup-title").value;
         const description = document.getElementById(
             "project-popup-descr"
         ).value;
@@ -37,10 +40,18 @@ const projectHandler = (() => {
         projectList[index].todos.push(todo);
         localStorage.setItem("project-list", JSON.stringify(projectList));
     }
+    function deleteProject(index) {
+        projectList.splice(index, 1);
+        displayHandler.clearContainers();
+        localStorage.setItem("project-list", JSON.stringify(projectList));
+        displayHandler.displayAllProjects();
+        console.log(projectList);
+    }
     return {
         createProject,
         projectList,
         addtodoToProject,
+        deleteProject,
     };
 })();
 
@@ -60,14 +71,16 @@ const todoHandler = (() => {
         .toLocaleString("sv", { timeZoneName: "short" })
         .slice(0, 10);
     function createTodo() {
-        const title = document.getElementById("popup-title").value;
+        const title =
+            document.getElementById("popup-title").value === ""
+                ? "Untitled ToDo"
+                : document.getElementById("popup-title").value;
         const description = document.getElementById("popup-descr").value;
         const date = document.getElementById("popup-date").value;
         const priority = document.getElementById("popup-priority").value;
         const projectIndex = document.getElementById("project-options").value;
         todoCount++;
         localStorage.setItem("todo-count", todoCount);
-        console.log(todoCount);
         const newTodo = {
             title: title,
             description: description,
@@ -104,7 +117,7 @@ const todoHandler = (() => {
         console.log(todoList);
         localStorage.setItem("todo-list", JSON.stringify(todoList));
         displayHandler.clearContainers();
-        displayHandler.displayAlltodos();
+        displayHandler.displayAllTodos();
     }
     function getTodoById(id) {
         for (let i = 0; i < todoList.length; i++) {
@@ -121,7 +134,7 @@ const todoHandler = (() => {
         todoList.splice(index, 1);
         displayHandler.clearContainers();
         localStorage.setItem("todo-list", JSON.stringify(todoList));
-        displayHandler.displayAlltodos();
+        displayHandler.displayAllTodos();
         console.log(todoList);
     }
     function getUpcoming(inputDate) {
@@ -259,7 +272,7 @@ const displayHandler = (() => {
         document.getElementById("edit-popup-descr").value = todo.description;
         document.getElementById("edit-popup-priority").value = todo.priority;
     }
-    function displayAlltodos() {
+    function displayAllTodos() {
         todoHandler.todoList.forEach((element) => {
             displayTodo(element, ".all-todos");
         });
@@ -285,6 +298,10 @@ const displayHandler = (() => {
         todoContainers.forEach((todoContainer) => {
             todoContainer.innerHTML = "";
         });
+        const projectContainers = document.querySelectorAll(".all-projects");
+        projectContainers.forEach((projectContainer) => {
+            projectContainer.innerHTML = "";
+        });
         document.getElementById("today-container").innerHTML = "";
         document.querySelector(".upcoming").innerHTML = "";
     }
@@ -301,6 +318,11 @@ const displayHandler = (() => {
     function fillProjectDropdown() {
         const dropdown = document.getElementById("project-options");
         dropdown.innerHTML = "";
+        const opt = document.createElement("option");
+        opt.textContent = "--Project--";
+        opt.value = "";
+        dropdown.appendChild(opt);
+
         let projectList = projectHandler.projectList;
 
         for (let i = 0; i < projectList.length; i++) {
@@ -318,16 +340,18 @@ const displayHandler = (() => {
         a.href = "#";
         a.textContent = inputProject.title;
 
-        // const deleteBtn = document.createElement("a");
-        // deleteBtn.classList.add("danger-text");
-        // deleteBtn.classList.add("delete-project-" + index);
-        // deleteBtn.textContent = "Delete";
-        // deleteBtn.href = "#";
+        const deleteBtn = document.createElement("a");
+        deleteBtn.classList.add("danger-text");
+        deleteBtn.classList.add("delete-project-" + index);
+        deleteBtn.textContent = "Delete";
+        deleteBtn.href = "#";
 
         projectDiv.appendChild(a);
-        // projectDiv.appendChild(deleteBtn)
         const projectContainers = document.querySelectorAll(".all-projects");
         projectContainers.forEach((projectContainer) => {
+            if (!projectContainer.classList.contains("project-tab")) {
+                projectDiv.appendChild(deleteBtn);
+            }
             projectContainer.appendChild(projectDiv.cloneNode(true));
         });
         const projectLinks = document.querySelectorAll(
@@ -336,6 +360,14 @@ const displayHandler = (() => {
         projectLinks.forEach((link) => {
             link.addEventListener("click", function () {
                 displayProjectTodos(index);
+            });
+        });
+        const deleteBtns = document.querySelectorAll(
+            ".delete-project-" + index
+        );
+        deleteBtns.forEach((btn) => {
+            btn.addEventListener("click", function () {
+                projectHandler.deleteProject(index);
             });
         });
     }
@@ -423,9 +455,7 @@ const displayHandler = (() => {
     document
         .getElementById("create-project")
         .addEventListener("click", function () {
-            const projectTitle = document.createElement("li");
-            projectTitle.textContent = projectHandler.createProject().title;
-            document.querySelector(".project-tab").appendChild(projectTitle);
+            projectHandler.createProject();
             togglePopUp("close");
         });
 
@@ -453,13 +483,14 @@ const displayHandler = (() => {
             }
         });
     });
-    displayAlltodos();
+    displayAllTodos();
     displayAllProjects();
     return {
         togglePopUp,
         displayTodo,
-        displayAlltodos,
+        displayAllTodos,
         clearContainers,
         displayProject,
+        displayAllProjects,
     };
 })();
