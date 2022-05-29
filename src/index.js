@@ -3,12 +3,9 @@ const { differenceInCalendarDays } = require("date-fns");
 const projectHandler = (() => {
     let projectList = [];
     try {
-        console.log(JSON.parse(localStorage.getItem("project-list") || "[]"));
         projectList = JSON.parse(localStorage.getItem("project-list") || "[]");
         // localStorage.removeItem("project-list");
-    } catch (e) {
-        console.log("empty");
-    }
+    } catch (e) {}
     let projectCount =
         projectList.length != 0
             ? JSON.parse(projectList[projectList.length - 1].projectId)
@@ -45,7 +42,6 @@ const projectHandler = (() => {
         displayHandler.clearContainers();
         localStorage.setItem("project-list", JSON.stringify(projectList));
         displayHandler.displayAllProjects();
-        console.log(projectList);
     }
     return {
         createProject,
@@ -59,13 +55,10 @@ const todoHandler = (() => {
     let todoList = [];
     let todoCount = 0;
     try {
-        console.log(JSON.parse(localStorage.getItem("todo-list") || "[]"));
         todoList = JSON.parse(localStorage.getItem("todo-list") || "[]");
         todoCount = localStorage.getItem("todo-count");
         // localStorage.removeItem("todo-count");
-    } catch (e) {
-        console.log("empty");
-    }
+    } catch (e) {}
 
     let today = new Date()
         .toLocaleString("sv", { timeZoneName: "short" })
@@ -89,9 +82,7 @@ const todoHandler = (() => {
             finished: false,
             todoId: todoCount,
         };
-        console.log(newTodo);
         if (projectIndex === "") {
-            console.log("regular todo");
             return newTodo;
         } else {
             projectHandler.addtodoToProject(projectIndex, newTodo);
@@ -110,14 +101,11 @@ const todoHandler = (() => {
             finished: getTodoById(id).todoObj.finished,
             todoId: getTodoById(id).todoObj.todoId,
         };
-        console.log(updatedtodo);
         const index = getTodoById(id).index;
         todoList[index] = updatedtodo;
         displayHandler.togglePopUp("edit");
-        console.log(todoList);
         localStorage.setItem("todo-list", JSON.stringify(todoList));
         displayHandler.clearContainers();
-        displayHandler.displayAllTodos();
     }
     function getTodoById(id) {
         for (let i = 0; i < todoList.length; i++) {
@@ -134,7 +122,6 @@ const todoHandler = (() => {
         todoList.splice(index, 1);
         displayHandler.clearContainers();
         localStorage.setItem("todo-list", JSON.stringify(todoList));
-        console.log(todoList);
     }
     function getUpcoming(inputDate) {
         let today = new Date();
@@ -174,7 +161,6 @@ const displayHandler = (() => {
     }
     function displayTodo(inputTodo, container, newTodo) {
         const todoId = inputTodo.todoId;
-        console.log(todoHandler.todoList);
         const index = todoHandler.getTodoById(todoId).index;
         const todo = document.createElement("div");
         todo.classList.add("todo");
@@ -250,20 +236,16 @@ const displayHandler = (() => {
         );
         checkBoxes.forEach((check) => {
             check.addEventListener("change", function () {
-                todoHandler.todoList[index].finished = document.querySelector(
-                    ".todo-checkbox-" + todoId
-                ).checked;
+                todoHandler.todoList[index].finished = check.checked
                 localStorage.setItem(
                     "todo-list",
                     JSON.stringify(todoHandler.todoList)
                 );
-                console.log(todoHandler.todoList[index]);
             });
         });
     }
     function fillEditPopup(id) {
         const todo = todoHandler.getTodoById(id).todoObj;
-        console.log(todoHandler.getTodoById(id));
         activeId = todo.todoId;
         document.querySelector(".edit-popup").classList.toggle("hide");
         document.getElementById("edit-popup-title").value = todo.title;
@@ -285,23 +267,49 @@ const displayHandler = (() => {
         const todoList = todoHandler.todoList;
         for (let i = 0; i < todoList.length; i++) {
             let row = table.insertRow();
-            let title = row.insertCell(0);
+            let status = row.insertCell(0);
+            const checkBox = document.createElement("input");
+            checkBox.classList.add("todo-checkbox-" + todoList[i].todoId);
+            checkBox.type = "checkbox";
+            checkBox.checked = todoList[i].finished ? true : false;
+            status.appendChild(checkBox);
+
+            let title = row.insertCell(1);
             title.innerHTML = todoList[i].title;
-            let description = row.insertCell(1);
+            let description = row.insertCell(2);
             description.innerHTML = todoList[i].description;
-            let date = row.insertCell(2);
+            let date = row.insertCell(3);
             date.innerHTML = todoList[i].date;
-            let priority = row.insertCell(3);
+            let priority = row.insertCell(4);
             priority.innerHTML = todoList[i].priority;
-            let actions = row.insertCell(4);
+            let actions = row.insertCell(5);
+
+            const edit = document.createElement("a");
+            edit.classList.add("accent-text");
+            edit.classList.add("edit-" + todoList[i].todoId);
+            edit.textContent = "Edit";
+            edit.href = "#";
+
             const deleteBtn = document.createElement("a");
             deleteBtn.classList.add("danger-text");
             deleteBtn.classList.add("delete-");
             deleteBtn.textContent = "Delete";
             deleteBtn.href = "#";
+
+            checkBox.addEventListener("change", function () {
+                todoHandler.todoList[i].finished = checkBox.checked
+                localStorage.setItem(
+                    "todo-list",
+                    JSON.stringify(todoHandler.todoList)
+                );
+            });
+            edit.addEventListener("click", function () {
+                fillEditPopup(todoList[i].todoId);
+            });
             deleteBtn.addEventListener("click", function () {
                 todoHandler.deleteTodo(i);
             });
+            actions.appendChild(edit);
             actions.appendChild(deleteBtn);
         }
     }
@@ -416,7 +424,6 @@ const displayHandler = (() => {
         const projectTodoContainer = document.querySelector(".project-todos");
         const projectTodos = projectHandler.projectList[index].todos;
         // for (let i = 0; i < projectTodos.length; i++) {
-        //     console.log(projectTodos[i]);
         // }
         const table = document.getElementById("project-todo-table");
         table.innerHTML = "";
@@ -448,6 +455,7 @@ const displayHandler = (() => {
         .getElementById("create-todo")
         .addEventListener("click", function () {
             let newTodo = todoHandler.createTodo();
+
             if (newTodo != null) {
                 todoHandler.todoList.push(newTodo);
                 displayHandler.displayTodo(newTodo, ".all-todos", true);
@@ -455,6 +463,7 @@ const displayHandler = (() => {
                     "todo-list",
                     JSON.stringify(todoHandler.todoList)
                 );
+                fillTodoTable();
             }
             displayHandler.togglePopUp("close");
             document.getElementById("popup-form").reset();
