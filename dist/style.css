@@ -55,7 +55,7 @@ td {
     padding: 0.5em;
 }
 
-td:nth-child(2) {
+td:nth-child(3) {
     width: 50%;
     max-width: 700px;
 }
@@ -269,8 +269,8 @@ tr:nth-child(even) {
 }
 
 .finished {
-    margin-top: 19px;
-    border-bottom: 4px dotted #b38b0d;
+    text-decoration: line-through;
+    opacity: .5;
 }
 
 .accent-text {
@@ -284,3 +284,5 @@ tr:nth-child(even) {
 .hide {
     display: none;
 }
+
+
