@@ -38,6 +38,15 @@ const projectHandler = (() => {
         projectList[index].todos.push(todo);
         localStorage.setItem("project-list", JSON.stringify(projectList));
     }
+    function editProject(projectIndex) {
+        projectList[projectIndex].title =
+            document.getElementById("project-title").value;
+
+        projectList[projectIndex].description = document.getElementById(
+            "project-description"
+        ).value;
+        localStorage.setItem("project-list", JSON.stringify(projectList));
+    }
     function deleteProject(index) {
         projectList.splice(index, 1);
         displayHandler.clearContainers();
@@ -61,12 +70,18 @@ const projectHandler = (() => {
         displayHandler.togglePopUp("edit");
         localStorage.setItem("project-list", JSON.stringify(projectList));
         displayHandler.clearContainers();
+        displayHandler.fillTodoTable(
+            "project-todo-table",
+            projectList[projectIndex].todos,
+            projectIndex
+        );
         activeProjectIndex = -1;
     }
     return {
         createProject,
         projectList,
         addtodoToProject,
+        editProject,
         deleteProject,
         activeProjectIndex,
         editProjectTodo,
@@ -293,7 +308,7 @@ const displayHandler = (() => {
             const checkBox = document.createElement("input");
             checkBox.classList.add("todo-checkbox-" + list[i].todoId);
             checkBox.type = "checkbox";
-            checkBox.checked = list[i].finished ? true : false;
+            checkBox.checked = list[i].finished;
             status.appendChild(checkBox);
 
             let title = row.insertCell(1);
@@ -320,8 +335,12 @@ const displayHandler = (() => {
             deleteBtn.href = "#";
 
             console.log(list);
+            if (checkBox.checked) {
+                title.classList.add("finished");
+            }
             checkBox.addEventListener("change", function () {
-                todoHandler.list[i].finished = checkBox.checked;
+                title.classList.toggle("finished");
+                list[i].finished = checkBox.checked;
                 localStorage.setItem("todo-list", JSON.stringify(list));
             });
             edit.addEventListener("click", function () {
@@ -409,6 +428,7 @@ const displayHandler = (() => {
         projectLinks.forEach((link) => {
             link.addEventListener("click", function () {
                 displayProjectTodos(index);
+                projectHandler.activeProjectIndex = index;
             });
         });
         const deleteBtns = document.querySelectorAll(
@@ -450,6 +470,31 @@ const displayHandler = (() => {
         const projectTodos = projectHandler.projectList[index].todos;
         fillTodoTable("project-todo-table", projectTodos, index);
     }
+
+    const tabs = document.querySelectorAll(".tab");
+    const pages = document.querySelectorAll(".page");
+    tabs.forEach((tab) => {
+        tab.addEventListener("click", function () {
+            for (let i = 0; i < tabs.length; i++) {
+                if (tab === tabs[i]) {
+                    pages[i].classList.remove("hide");
+                    if (pages[i].classList.contains("todo-page")) {
+                        fillTodoTable("todo-table", todoHandler.todoList);
+                    }
+                    if (pages[i].classList.contains("project-page")) {
+                        document
+                            .getElementById("all-projects-section")
+                            .classList.remove("hide");
+                        document
+                            .querySelector(".individual-project")
+                            .classList.add("hide");
+                    }
+                } else {
+                    pages[i].classList.add("hide");
+                }
+            }
+        });
+    });
     const closeBtns = document.querySelectorAll(".x-btn");
     closeBtns.forEach((btn) => {
         btn.addEventListener("click", function () {
@@ -500,31 +545,17 @@ const displayHandler = (() => {
             projectHandler.createProject();
             togglePopUp("close");
         });
-
-    const tabs = document.querySelectorAll(".tab");
-    const pages = document.querySelectorAll(".page");
-    tabs.forEach((tab) => {
-        tab.addEventListener("click", function () {
-            for (let i = 0; i < tabs.length; i++) {
-                if (tab === tabs[i]) {
-                    pages[i].classList.remove("hide");
-                    if (pages[i].classList.contains("todo-page")) {
-                        fillTodoTable("todo-table", todoHandler.todoList);
-                    }
-                    if (pages[i].classList.contains("project-page")) {
-                        document
-                            .getElementById("all-projects-section")
-                            .classList.remove("hide");
-                        document
-                            .querySelector(".individual-project")
-                            .classList.add("hide");
-                    }
-                } else {
-                    pages[i].classList.add("hide");
-                }
-            }
+    document
+        .getElementById("project-title")
+        .addEventListener("input", function () {
+            projectHandler.editProject(projectHandler.activeProjectIndex);
         });
-    });
+    document
+        .getElementById("project-description")
+        .addEventListener("input", function () {
+            projectHandler.editProject(projectHandler.activeProjectIndex);
+        });
+
     displayAllTodos();
     displayAllProjects();
     return {
@@ -534,5 +565,6 @@ const displayHandler = (() => {
         clearContainers,
         displayProject,
         displayAllProjects,
+        fillTodoTable,
     };
 })();
