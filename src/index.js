@@ -75,7 +75,7 @@ const projectHandler = (() => {
             projectList[projectIndex].todos,
             projectIndex
         );
-        activeProjectIndex = -1;
+        projectHandler.activeProjectIndex = -1;
     }
     return {
         createProject,
@@ -90,6 +90,7 @@ const projectHandler = (() => {
 
 const todoHandler = (() => {
     let todoList = [];
+    let todayList = [];
     let todoCount = 0;
     try {
         todoList = JSON.parse(localStorage.getItem("todo-list") || "[]");
@@ -169,6 +170,7 @@ const todoHandler = (() => {
     return {
         createTodo,
         todoList,
+        todayList,
         todoCount,
         today,
         getTodoById,
@@ -245,6 +247,7 @@ const displayHandler = (() => {
             document
                 .querySelector("#today-container")
                 .appendChild(todo.cloneNode(true));
+            todoHandler.todayList.push(inputTodo);
         }
         if (todoHandler.getUpcoming(inputTodo.date)) {
             document
@@ -284,6 +287,7 @@ const displayHandler = (() => {
     }
     function fillEditPopup(todo) {
         activeId = todo.todoId;
+        console.log(activeId);
         document.querySelector(".edit-popup").classList.toggle("hide");
         document.getElementById("edit-popup-title").value = todo.title;
         document.getElementById("edit-popup-date").value = todo.date;
@@ -295,6 +299,7 @@ const displayHandler = (() => {
             displayTodo(element, ".all-todos");
         });
         fillTodoTable("todo-table", todoHandler.todoList);
+        fillTodoTable("today-todo-table", todoHandler.todayList);
     }
     function fillTodoTable(tableId, list, projectIndex) {
         const table = document.getElementById(tableId);
@@ -336,10 +341,10 @@ const displayHandler = (() => {
 
             console.log(list);
             if (checkBox.checked) {
-                title.classList.add("finished");
+                row.classList.add("finished");
             }
             checkBox.addEventListener("change", function () {
-                title.classList.toggle("finished");
+                row.classList.toggle("finished");
                 list[i].finished = checkBox.checked;
                 localStorage.setItem("todo-list", JSON.stringify(list));
             });
@@ -520,19 +525,24 @@ const displayHandler = (() => {
                     JSON.stringify(todoHandler.todoList)
                 );
                 fillTodoTable("todo-table", todoHandler.todoList);
+                fillTodoTable("today-todo-table", todoHandler.todayList);
             }
             displayHandler.togglePopUp("close");
             document.getElementById("popup-form").reset();
         });
     document.getElementById("edit-todo").addEventListener("click", function () {
+        console.log(projectHandler.activeProjectIndex);
         if (projectHandler.activeProjectIndex === -1) {
+            console.log("regular");
             todoHandler.editTodo(activeId);
         } else {
+            console.log("project");
             projectHandler.editProjectTodo(
                 projectHandler.activeProjectIndex,
                 activeTodoIndex
             );
         }
+        console.log(projectHandler.activeProjectIndex);
     });
     document
         .getElementById("new-project")
