@@ -45,13 +45,13 @@ const projectHandler = (() => {
         projectList[projectIndex].description = document.getElementById(
             "project-description"
         ).value;
+        displayHandler.clearContainers();
         localStorage.setItem("project-list", JSON.stringify(projectList));
     }
     function deleteProject(index) {
         projectList.splice(index, 1);
         displayHandler.clearContainers();
         localStorage.setItem("project-list", JSON.stringify(projectList));
-        displayHandler.displayAllProjects();
     }
     function editProjectTodo(projectIndex, todoIndex) {
         const title = document.getElementById("edit-popup-title").value;
@@ -77,6 +77,16 @@ const projectHandler = (() => {
         );
         projectHandler.activeProjectIndex = -1;
     }
+    function deleteProjectTodo(projectIndex, todoIndex) {
+        projectList[projectIndex].todos.splice(todoIndex, 1);
+        displayHandler.clearContainers();
+        localStorage.setItem("project-list", JSON.stringify(projectList));
+        displayHandler.fillTodoTable(
+            "project-todo-table",
+            projectList[projectIndex].todos,
+            projectIndex
+        );
+    }
     return {
         createProject,
         projectList,
@@ -85,6 +95,7 @@ const projectHandler = (() => {
         deleteProject,
         activeProjectIndex,
         editProjectTodo,
+        deleteProjectTodo,
     };
 })();
 
@@ -124,6 +135,11 @@ const todoHandler = (() => {
             return newTodo;
         } else {
             projectHandler.addtodoToProject(projectIndex, newTodo);
+            displayHandler.fillTodoTable(
+                "project-todo-table",
+                projectHandler.projectList[projectIndex].todos,
+                projectIndex
+            );
         }
     }
     function editTodo(id) {
@@ -287,7 +303,6 @@ const displayHandler = (() => {
     }
     function fillEditPopup(todo) {
         activeId = todo.todoId;
-        console.log(activeId);
         document.querySelector(".edit-popup").classList.toggle("hide");
         document.getElementById("edit-popup-title").value = todo.title;
         document.getElementById("edit-popup-date").value = todo.date;
@@ -303,10 +318,7 @@ const displayHandler = (() => {
     }
     function fillTodoTable(tableId, list, projectIndex) {
         const table = document.getElementById(tableId);
-        if (table !== null) {
-            table.innerHTML = "";
-        }
-        // const todoList = todoHandler.todoList;
+        table.innerHTML = "";
         for (let i = 0; i < list.length; i++) {
             let row = table.insertRow();
             let status = row.insertCell(0);
@@ -327,19 +339,19 @@ const displayHandler = (() => {
             let actions = row.insertCell(5);
 
             const edit = document.createElement("a");
-            edit.classList.add("accent-text");
-            edit.classList.add("edit-" + list[i].todoId);
             edit.classList.add(tableId);
+            edit.classList.add("edit-" + list[i].todoId);
+            edit.classList.add("accent-text");
             edit.textContent = "Edit";
             edit.href = "#";
 
             const deleteBtn = document.createElement("a");
+            deleteBtn.classList.add(tableId);
             deleteBtn.classList.add("danger-text");
             deleteBtn.classList.add("delete-");
             deleteBtn.textContent = "Delete";
             deleteBtn.href = "#";
 
-            console.log(list);
             if (checkBox.checked) {
                 row.classList.add("finished");
             }
@@ -349,21 +361,26 @@ const displayHandler = (() => {
                 localStorage.setItem("todo-list", JSON.stringify(list));
             });
             edit.addEventListener("click", function () {
-                console.log(list[i]);
                 fillEditPopup(list[i]);
                 if (edit.classList.contains("project-todo-table")) {
                     projectHandler.activeProjectIndex = projectIndex;
                     activeTodoIndex = i;
+                    document.getElementById("edit-todo").classList.add(tableId);
                 }
             });
             deleteBtn.addEventListener("click", function () {
-                todoHandler.deleteTodo(i);
+                if (!deleteBtn.classList.contains("project-todo-table")) {
+                    todoHandler.deleteTodo(i);
+                } else {
+                    projectHandler.deleteProjectTodo(projectIndex, i);
+                }
             });
             actions.appendChild(edit);
             actions.appendChild(deleteBtn);
         }
     }
     function clearContainers() {
+        todoHandler.todayList = [];
         const todoContainers = document.querySelectorAll(".all-todos");
         todoContainers.forEach((todoContainer) => {
             todoContainer.innerHTML = "";
@@ -374,6 +391,7 @@ const displayHandler = (() => {
         });
         document.getElementById("today-container").innerHTML = "";
         document.querySelector(".upcoming").innerHTML = "";
+        document.querySelector(".project-tab").innerHTML = "";
         displayAllTodos();
         displayAllProjects();
     }
@@ -531,18 +549,21 @@ const displayHandler = (() => {
             document.getElementById("popup-form").reset();
         });
     document.getElementById("edit-todo").addEventListener("click", function () {
-        console.log(projectHandler.activeProjectIndex);
-        if (projectHandler.activeProjectIndex === -1) {
-            console.log("regular");
+        if (
+            !document
+                .getElementById("edit-todo")
+                .classList.contains("project-todo-table")
+        ) {
             todoHandler.editTodo(activeId);
         } else {
-            console.log("project");
             projectHandler.editProjectTodo(
                 projectHandler.activeProjectIndex,
                 activeTodoIndex
             );
+            document
+                .getElementById("edit-todo")
+                .classList.remove("project-todo-table");
         }
-        console.log(projectHandler.activeProjectIndex);
     });
     document
         .getElementById("new-project")
