@@ -39,8 +39,12 @@ const projectHandler = (() => {
         localStorage.setItem("project-list", JSON.stringify(projectList));
     }
     function editProject(projectIndex) {
-        projectList[projectIndex].title =
-            document.getElementById("project-title").value;
+        if (document.getElementById("project-title").value === "") {
+            projectList[projectIndex].title = "Untitled Project";
+        } else {
+            projectList[projectIndex].title =
+                document.getElementById("project-title").value;
+        }
 
         projectList[projectIndex].description = document.getElementById(
             "project-description"
@@ -293,7 +297,11 @@ const displayHandler = (() => {
         );
         checkBoxes.forEach((check) => {
             check.addEventListener("change", function () {
+                console.log(checkBoxes);
                 todoHandler.todoList[index].finished = check.checked;
+                checkBoxes.forEach((check) => {
+                    check.checked = todoHandler.todoList[index].finished
+                })
                 localStorage.setItem(
                     "todo-list",
                     JSON.stringify(todoHandler.todoList)
@@ -355,9 +363,15 @@ const displayHandler = (() => {
             if (checkBox.checked) {
                 row.classList.add("finished");
             }
+            const checkBoxes = document.querySelectorAll(
+                ".todo-checkbox-" + list[i].todoId
+            );
             checkBox.addEventListener("change", function () {
                 row.classList.toggle("finished");
                 list[i].finished = checkBox.checked;
+                checkBoxes.forEach((check) => {
+                    check.checked = list[i].finished
+                })
                 localStorage.setItem("todo-list", JSON.stringify(list));
             });
             edit.addEventListener("click", function () {
