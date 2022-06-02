@@ -10,21 +10,30 @@
     <body>
         <div class="overall-container">
             <div class="sidebar">
+                <button class="side-toggle" aria-label="open navigation">
+                    toggle
+                </button>
                 <h1>To Do</h1>
-                <a id="create-btn" class="action-btn" href="#"
-                    >+ Create New Todo</a
-                >
-                <ul class="sidebar-tabs">
-                    <li><a id="home-page-btn" class="tab" href="#">Home</a></li>
-                    <li><a class="tab" href="#">Inbox</a></li>
-                    <li>
-                        <a id="todo-page-btn" class="tab" href="#">All ToDos</a>
-                    </li>
-                    <li>
-                        <a class="tab" href="#">Projects</a>
-                        <ul class="project-tab all-projects"></ul>
-                    </li>
-                </ul>
+                <div class="sidebar-container">
+                    <a id="create-btn" class="action-btn" href="#"
+                        >+ Create New Todo</a
+                    >
+                    <ul class="sidebar-tabs">
+                        <li>
+                            <a id="home-page-btn" class="tab" href="#">Home</a>
+                        </li>
+                        <li><a class="tab" href="#">Inbox</a></li>
+                        <li>
+                            <a id="todo-page-btn" class="tab" href="#"
+                                >All ToDos</a
+                            >
+                        </li>
+                        <li>
+                            <a class="tab" href="#">Projects</a>
+                            <ul class="project-tab all-projects"></ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="popup hide">
                 <div class="popup-container">
@@ -144,18 +153,12 @@
                 </div>
             </div>
             <div class="content-container">
-                <div class="home-page page">
-                    <div class="row">
+                <div class="home-page page row">
+                    <div class="column">
                         <div id="today-card" class="card">
                             <h3>Today:</h3>
                             <div id="today-container"></div>
                         </div>
-                        <div class="card">
-                            <h3>Upcoming:</h3>
-                            <div class="upcoming"></div>
-                        </div>
-                    </div>
-                    <div class="row">
                         <div class="card">
                             <div class="todo-divider">
                                 <h3>Projects:</h3>
@@ -169,6 +172,13 @@
                             </div>
                             <div class="all-projects"></div>
                         </div>
+                    </div>
+                    <div class="column">
+                        <div class="card">
+                            <h3>Upcoming:</h3>
+                            <div class="upcoming"></div>
+                        </div>
+
                         <div class="card">
                             <h3>All ToDos:</h3>
                             <div class="all-todos"></div>
