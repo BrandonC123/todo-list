@@ -165,7 +165,7 @@ tr:nth-child(even) {
     margin-bottom: 5px;
 }
 
-.description {
+.description, .project-description {
     justify-self: flex-start;
     height: 60%;
     border: 1px solid rgb(233, 233, 233);
@@ -196,6 +196,10 @@ tr:nth-child(even) {
     padding: 0.2em;
 }
 
+.project-row {
+    margin-top: 10px;
+}
+
 .individual-project {
     height: 100%;
 }
@@ -204,7 +208,12 @@ tr:nth-child(even) {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    gap: 15px;
     height: 30%;
+}
+
+.project-description {
+    width: 50%;
 }
 
 .priority-square {
@@ -216,7 +225,7 @@ tr:nth-child(even) {
 
 .action-btn,
 .secondary-btn {
-    font-size: 0.9em;
+    font-size: 0.9rem;
     text-decoration: none;
     font-weight: bold;
     padding: 0.5em 2em;
