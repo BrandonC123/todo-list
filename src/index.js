@@ -297,11 +297,10 @@ const displayHandler = (() => {
         );
         checkBoxes.forEach((check) => {
             check.addEventListener("change", function () {
-                console.log(checkBoxes);
                 todoHandler.todoList[index].finished = check.checked;
                 checkBoxes.forEach((check) => {
-                    check.checked = todoHandler.todoList[index].finished
-                })
+                    check.checked = todoHandler.todoList[index].finished;
+                });
                 localStorage.setItem(
                     "todo-list",
                     JSON.stringify(todoHandler.todoList)
@@ -367,12 +366,34 @@ const displayHandler = (() => {
                 ".todo-checkbox-" + list[i].todoId
             );
             checkBox.addEventListener("change", function () {
+                if (tableId === "todo-table") {
+                    list[i].finished = checkBox.checked;
+                    checkBoxes.forEach((check) => {
+                        check.checked = list[i].finished;
+                    });
+                    localStorage.setItem("todo-list", JSON.stringify(list));
+                }
+                if (tableId === "project-todo-table") {
+                    projectHandler.projectList[projectIndex].todos[i].finished =
+                        checkBox.checked;
+                    localStorage.setItem(
+                        "project-list",
+                        JSON.stringify(projectHandler.projectList)
+                    );
+                }
+                if (tableId === "today-todo-table") {
+                    const todo = todoHandler.getTodoById(list[i].todoId);
+                    todoHandler.todoList[todo.index].finished =
+                        checkBox.checked;
+                    checkBoxes.forEach((check) => {
+                        check.checked = list[i].finished;
+                    });
+                    localStorage.setItem(
+                        "todo-list",
+                        JSON.stringify(todoHandler.todoList)
+                    );
+                }
                 row.classList.toggle("finished");
-                list[i].finished = checkBox.checked;
-                checkBoxes.forEach((check) => {
-                    check.checked = list[i].finished
-                })
-                localStorage.setItem("todo-list", JSON.stringify(list));
             });
             edit.addEventListener("click", function () {
                 fillEditPopup(list[i]);
