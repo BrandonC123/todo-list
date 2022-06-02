@@ -297,6 +297,7 @@ const displayHandler = (() => {
         );
         checkBoxes.forEach((check) => {
             check.addEventListener("change", function () {
+                console.log(checkBoxes);
                 todoHandler.todoList[index].finished = check.checked;
                 checkBoxes.forEach((check) => {
                     check.checked = todoHandler.todoList[index].finished;
@@ -305,6 +306,7 @@ const displayHandler = (() => {
                     "todo-list",
                     JSON.stringify(todoHandler.todoList)
                 );
+                fillTodoTable("today-todo-table", todoHandler.todayList);
             });
         });
     }
@@ -371,6 +373,7 @@ const displayHandler = (() => {
                     checkBoxes.forEach((check) => {
                         check.checked = list[i].finished;
                     });
+                    fillTodoTable("today-todo-table", todoHandler.todayList);
                     localStorage.setItem("todo-list", JSON.stringify(list));
                 }
                 if (tableId === "project-todo-table") {
@@ -404,10 +407,19 @@ const displayHandler = (() => {
                 }
             });
             deleteBtn.addEventListener("click", function () {
-                if (!deleteBtn.classList.contains("project-todo-table")) {
+                if (tableId === "todo-table") {
                     todoHandler.deleteTodo(i);
-                } else {
+                }
+                if (tableId === "project-todo-table") {
                     projectHandler.deleteProjectTodo(projectIndex, i);
+                }
+                if (tableId === "today-todo-table") {
+                    const todo = todoHandler.getTodoById(list[i].todoId);
+                    todoHandler.deleteTodo(todo.index);
+                    localStorage.setItem(
+                        "todo-list",
+                        JSON.stringify(todoHandler.todoList)
+                    );
                 }
             });
             actions.appendChild(edit);
@@ -477,6 +489,7 @@ const displayHandler = (() => {
             if (!projectContainer.classList.contains("project-tab")) {
                 projectDiv.classList.add("todo");
                 projectDiv.appendChild(deleteBtn);
+                a.classList.add("accent-text");
             }
             projectContainer.appendChild(projectDiv.cloneNode(true));
         });
