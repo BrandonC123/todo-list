@@ -566,6 +566,14 @@ const displayHandler = (() => {
             }
         });
     });
+    document
+        .querySelector(".side-toggle")
+        .addEventListener("click", function () {
+            document.querySelector(".sidebar").classList.toggle("show-sidebar");
+            document
+                .querySelector(".sidebar-content-container")
+                .classList.toggle("show-sidebar");
+        });
     const closeBtns = document.querySelectorAll(".x-btn");
     closeBtns.forEach((btn) => {
         btn.addEventListener("click", function () {
