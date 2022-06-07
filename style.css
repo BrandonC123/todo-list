@@ -7,6 +7,10 @@ body {
     font-family: "Roboto", sans-serif;
 }
 
+img {
+    max-width: 100%;
+}
+
 input,
 textarea {
     font-family: "Roboto", sans-serif;
@@ -74,6 +78,9 @@ tr:nth-child(even) {
 .side-toggle {
     position: fixed;
     top: 5px;
+    background: none;
+    border: none;
+    left: 0;
 }
 
 .sidebar {
@@ -85,6 +92,7 @@ tr:nth-child(even) {
     padding: 1em;
     background-color: black;
     color: white;
+    box-shadow: 2px 2px 6px black;
 }
 
 .sidebar-content-container {
@@ -140,7 +148,6 @@ tr:nth-child(even) {
 .popup-container {
     width: 90%;
     height: 50%;
-    /* margin: 0 auto; */
 }
 
 .popup-header {
@@ -171,18 +178,12 @@ tr:nth-child(even) {
     height: 100%;
 }
 
-.todo-divider {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
 .description,
 .project-description {
     justify-self: flex-start;
     height: 60%;
     border: 1px solid rgb(233, 233, 233);
+    margin: 5px 0;
 }
 
 .card {
@@ -209,6 +210,13 @@ tr:nth-child(even) {
     border: 1px solid rgb(146, 146, 146);
     border-radius: 0.5em;
     padding: 0.2em;
+}
+
+.todo-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
 }
 
 .project-row {
@@ -239,7 +247,7 @@ tr:nth-child(even) {
 
 .action-btn,
 .secondary-btn {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     text-decoration: none;
     font-weight: bold;
     padding: 0.5em 2em;
@@ -331,16 +339,27 @@ tr:nth-child(even) {
     .sidebar-content-container {
         display: block;
     }
+    .card {
+        min-width: 350px;
+    }
     .todo {
         display: flex;
         justify-content: space-between;
-        gap: 5px;
         align-items: center;
+        flex-direction: row;
+        gap: 5px;
         margin-bottom: 8px;
         max-width: 700px;
         background-color: white;
         border: 1px solid rgb(146, 146, 146);
         border-radius: 0.5em;
         padding: 0.2em;
+    }
+    .todo-divider {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
     }
 }
