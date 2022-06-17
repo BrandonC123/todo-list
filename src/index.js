@@ -5,7 +5,6 @@ const projectHandler = (() => {
     let activeProjectIndex = -1;
     try {
         projectList = JSON.parse(localStorage.getItem("project-list") || "[]");
-        // localStorage.removeItem("project-list");
     } catch (e) {}
     let projectCount =
         projectList.length != 0
@@ -564,15 +563,17 @@ const displayHandler = (() => {
                     pages[i].classList.add("hide");
                 }
             }
+            if (window.innerWidth <= 800) {
+                document
+                    .querySelector(".sidebar")
+                    .classList.toggle("show-sidebar");
+            }
         });
     });
     document
         .querySelector(".side-toggle")
         .addEventListener("click", function () {
             document.querySelector(".sidebar").classList.toggle("show-sidebar");
-            document
-                .querySelector(".sidebar-content-container")
-                .classList.toggle("show-sidebar");
         });
     const closeBtns = document.querySelectorAll(".x-btn");
     closeBtns.forEach((btn) => {
