@@ -258,12 +258,14 @@ const displayHandler = (() => {
         deleteBtn.textContent = "Delete";
         deleteBtn.href = "#";
 
-        todo.appendChild(checkBox);
-        todo.appendChild(todoTitle);
-        todo.appendChild(calendar);
-        todo.appendChild(prioritySquare);
-        todo.appendChild(edit);
-        todo.appendChild(deleteBtn);
+        const divider1 = document.createElement("div");
+        divider1.classList.add("divider1");
+        divider1.append(todoTitle, calendar);
+        const divider2 = document.createElement("div");
+        divider2.classList.add("divider2");
+        divider2.append(edit, deleteBtn);
+        todo.append(checkBox, divider1, prioritySquare, divider2);
+
         if (inputTodo.date.toString() === todoHandler.today.toString()) {
             document
                 .querySelector("#today-container")
@@ -472,7 +474,6 @@ const displayHandler = (() => {
     }
     function displayProject(inputProject, index) {
         const projectDiv = document.createElement("div");
-        projectDiv.classList.add("project-row");
         const a = document.createElement("a");
         a.classList.add("project-link-" + index);
         a.href = "#";
@@ -488,7 +489,7 @@ const displayHandler = (() => {
         const projectContainers = document.querySelectorAll(".all-projects");
         projectContainers.forEach((projectContainer) => {
             if (!projectContainer.classList.contains("project-tab")) {
-                projectDiv.classList.add("todo");
+                projectDiv.classList.add("project-row");
                 projectDiv.appendChild(deleteBtn);
                 a.classList.add("accent-text");
             }
