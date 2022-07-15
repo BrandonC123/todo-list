@@ -17,6 +17,11 @@ textarea {
     font-family: "Roboto", sans-serif;
 }
 
+.popup input,
+.popup textarea {
+    text-align: center;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -109,7 +114,7 @@ tr:nth-child(even) {
 .page {
     height: 100%;
     overflow: auto;
-    padding: 1em 0.5em;
+    padding: 2em 0.5em;
 }
 
 .home-page {
@@ -140,7 +145,7 @@ tr:nth-child(even) {
 
 .popup-container {
     width: 85%;
-    height: 50%;
+    height: 60%;
     /*Set a max width to avoid adding media query*/
     max-width: 700px;
 }
@@ -162,7 +167,7 @@ tr:nth-child(even) {
     border: 1px solid rgb(146, 146, 146);
     border-bottom-left-radius: 0.5em;
     border-bottom-right-radius: 0.5em;
-    padding: 3em;
+    padding: 2em;
 }
 
 .form {
@@ -187,7 +192,7 @@ tr:nth-child(even) {
     overflow: auto;
     width: 35%;
     height: 45%;
-    max-height: 500px;
+    max-height: 700px;
     min-width: 300px;
     padding: 0.5em;
     box-shadow: 0 0 5px rgb(146, 146, 146);
@@ -221,9 +226,14 @@ tr:nth-child(even) {
     gap: 5px;
 }
 
+.popup .todo-divider {
+    align-items: center;
+}
+
 .project-row {
     display: flex;
     justify-content: space-between;
+    max-width: 400px;
     background-color: white;
     border: 1px solid rgb(146, 146, 146);
     border-radius: 0.5em;
@@ -332,6 +342,11 @@ tr:nth-child(even) {
 }
 
 @media (min-width: 800px) {
+    .popup input,
+    .popup textarea {
+        font-family: "Roboto", sans-serif;
+        text-align: start;
+    }
     table {
         font-size: 0.9rem;
     }
@@ -348,14 +363,25 @@ tr:nth-child(even) {
     }
     .action-btn,
     .secondary-btn {
-        font-size: 0.8rem;
+        font-size: .8rem;
+    }
+    .todo-divider {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
     }
     .page {
-        padding: 1em;
+        padding: 2em;
     }
 }
 
 @media (min-width: 1150px) {
+    .action-btn,
+    .secondary-btn {
+        font-size: .9rem;
+    }
     table {
         font-size: 1rem;
     }
@@ -374,7 +400,7 @@ tr:nth-child(even) {
     }
     .home-page-left-col,
     .home-page-right-col {
-        height: 85%;
+        height: 90%;
     }
     .card {
         width: 70%;
@@ -388,12 +414,5 @@ tr:nth-child(even) {
         border: 1px solid rgb(146, 146, 146);
         border-radius: 0.5em;
         padding: 0.2em;
-    }
-    .todo-divider {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 5px;
     }
 }

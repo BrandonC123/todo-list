@@ -523,6 +523,10 @@ const displayHandler = (() => {
         const pages = document.querySelectorAll(".page");
         const projectList = projectHandler.projectList;
 
+        if (screen.width <= 850) {
+            document.querySelector(".sidebar").classList.remove("show-sidebar");
+        }
+
         pages.forEach((page) => {
             if (page.classList.contains("project-page")) {
                 page.classList.remove("hide");
@@ -565,11 +569,11 @@ const displayHandler = (() => {
                 } else {
                     pages[i].classList.add("hide");
                 }
-            }
-            if (window.innerWidth <= 800) {
-                document
-                    .querySelector(".sidebar")
-                    .classList.toggle("show-sidebar");
+                if (screen.width <= 850) {
+                    document
+                        .querySelector(".sidebar")
+                        .classList.remove("show-sidebar");
+                }
             }
         });
     });
@@ -606,6 +610,11 @@ const displayHandler = (() => {
                 fillTodoTable("today-todo-table", todoHandler.todayList);
             }
             displayHandler.togglePopUp("close");
+            if (screen.width <= 850) {
+                document
+                    .querySelector(".sidebar")
+                    .classList.remove("show-sidebar");
+            }
             document.getElementById("popup-form").reset();
         });
     document.getElementById("edit-todo").addEventListener("click", function () {
