@@ -1,5 +1,3 @@
-import { initializeApp } from "firebase/app";
-
 const { differenceInCalendarDays } = require("date-fns");
 
 const projectHandler = (() => {
@@ -668,15 +666,3 @@ const displayHandler = (() => {
         fillTodoTable,
     };
 })();
-
-const firebaseConfig = {
-    apiKey: "AIzaSyAtMkDXNFrwaXN7AK26tetFtDkDA85-u0k",
-    authDomain: "todo-list-app-beb08.firebaseapp.com",
-    projectId: "todo-list-app-beb08",
-    storageBucket: "todo-list-app-beb08.appspot.com",
-    messagingSenderId: "770230459038",
-    appId: "1:770230459038:web:e8d60337da95ddcc3b398f",
-    measurementId: "G-68Y5DNKXPM",
-};
-
-const app = initializeApp(firebaseConfig);
