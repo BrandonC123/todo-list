@@ -1,3 +1,20 @@
+import { initializeApp } from "firebase/app";
+import { doc, setDoc } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+const firebaseConfig = {
+    apiKey: "AIzaSyAxQ8hAUlNRWOi836iNrHQsmMUv18gSP14",
+    authDomain: "todo-list-f9f8d.firebaseapp.com",
+    projectId: "todo-list-f9f8d",
+    storageBucket: "todo-list-f9f8d.appspot.com",
+    messagingSenderId: "412734533537",
+    appId: "1:412734533537:web:b7bbfa60152eac743d65e0",
+    measurementId: "G-CKR6JVLF99",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const { differenceInCalendarDays } = require("date-fns");
 
 const projectHandler = (() => {
@@ -115,7 +132,7 @@ const todoHandler = (() => {
     let today = new Date()
         .toLocaleString("sv", { timeZoneName: "short" })
         .slice(0, 10);
-    function createTodo() {
+    async function createTodo() {
         const title =
             document.getElementById("popup-title").value === ""
                 ? "Untitled ToDo"
@@ -135,6 +152,19 @@ const todoHandler = (() => {
             todoId: todoCount,
         };
         if (projectIndex === "") {
+            try {
+                await setDoc(doc(db, "todos", "todo-" + todoCount), {
+                    title: title,
+                    description: description,
+                    date: date,
+                    priority: priority,
+                    finished: false,
+                    todoId: todoCount,
+                });
+                console.log("t");
+            } catch (error) {
+                console.error(error);
+            }
             return newTodo;
         } else {
             projectHandler.addtodoToProject(projectIndex, newTodo);
