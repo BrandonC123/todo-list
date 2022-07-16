@@ -7,8 +7,8 @@ Full width
 Medium width
 <img src="readme-images/medium-width-todo-page.png">
 
-Mobile (sidebar hidden)
+Mobile (sidebar hidden)  
 <img src="readme-images/mobile-view-todo-page1.png">
 
-Mobile (sidebar shown)
+Mobile (sidebar shown)  
 <img src="readme-images/mobile-view-todo-page2.png">
