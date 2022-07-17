@@ -1,6 +1,9 @@
+import { id } from "date-fns/locale";
 import { initializeApp } from "firebase/app";
-import { doc, setDoc } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
+import { doc, setDoc, collection, addDoc, getDocs } from "firebase/firestore";
+import {} from "firebase/firestore";
+import {} from "firebase/firestore";
 const firebaseConfig = {
     apiKey: "AIzaSyAxQ8hAUlNRWOi836iNrHQsmMUv18gSP14",
     authDomain: "todo-list-f9f8d.firebaseapp.com",
@@ -27,7 +30,7 @@ const projectHandler = (() => {
         projectList.length != 0
             ? JSON.parse(projectList[projectList.length - 1].projectId)
             : 0;
-    function createProject() {
+    async function createProject() {
         const title =
             document.getElementById("project-popup-title").value === ""
                 ? "Untitled Project"
@@ -47,6 +50,13 @@ const projectHandler = (() => {
         };
         projectList.push(project);
         localStorage.setItem("project-list", JSON.stringify(projectList));
+        const proj = await addDoc(collection(db, "projects"), {
+            title: title,
+            description: description,
+            dueDate: date,
+            todos: todos,
+            projectId: projectCount,
+        });
         displayHandler.displayProject(project, projectList.length - 1);
         return project;
     }
@@ -124,7 +134,12 @@ const todoHandler = (() => {
     let todayList = [];
     let todoCount = 0;
     try {
-        todoList = JSON.parse(localStorage.getItem("todo-list") || "[]");
+        getDocs(collection(db, "todos")).then((list) => {
+            todoList = list.docs.map((doc) => {
+                todoList.push({ id: doc.id, ...doc.data() });
+            });
+            displayHandler.displayAllTodos();
+        });
         todoCount = localStorage.getItem("todo-count");
         // localStorage.removeItem("todo-count");
     } catch (e) {}
@@ -153,7 +168,7 @@ const todoHandler = (() => {
         };
         if (projectIndex === "") {
             try {
-                await setDoc(doc(db, "todos", "todo-" + todoCount), {
+                await addDoc(collection(db, "todos"), {
                     title: title,
                     description: description,
                     date: date,
@@ -161,11 +176,10 @@ const todoHandler = (() => {
                     finished: false,
                     todoId: todoCount,
                 });
-                console.log("t");
+                return newTodo;
             } catch (error) {
                 console.error(error);
             }
-            return newTodo;
         } else {
             projectHandler.addtodoToProject(projectIndex, newTodo);
             displayHandler.fillTodoTable(
@@ -173,6 +187,7 @@ const todoHandler = (() => {
                 projectHandler.projectList[projectIndex].todos,
                 projectIndex
             );
+            return newTodo;
         }
     }
     function editTodo(id) {
@@ -216,6 +231,7 @@ const todoHandler = (() => {
         let result = differenceInCalendarDays(testDate, today);
         return result <= 7 && result >= 0 ? true : false;
     }
+
     return {
         createTodo,
         todoList,
@@ -226,6 +242,7 @@ const todoHandler = (() => {
         editTodo,
         deleteTodo,
         getUpcoming,
+        // getTodoList,
     };
 })();
 
@@ -328,7 +345,6 @@ const displayHandler = (() => {
         );
         checkBoxes.forEach((check) => {
             check.addEventListener("change", function () {
-                console.log(checkBoxes);
                 todoHandler.todoList[index].finished = check.checked;
                 checkBoxes.forEach((check) => {
                     check.checked = todoHandler.todoList[index].finished;
@@ -350,6 +366,7 @@ const displayHandler = (() => {
         document.getElementById("edit-popup-priority").value = todo.priority;
     }
     function displayAllTodos() {
+        console.log(todoHandler.todoList);
         todoHandler.todoList.forEach((element) => {
             displayTodo(element, ".all-todos");
         });
@@ -624,11 +641,12 @@ const displayHandler = (() => {
         });
     document
         .getElementById("create-todo")
-        .addEventListener("click", function () {
-            let newTodo = todoHandler.createTodo();
+        .addEventListener("click", async function () {
+            let newTodo = await todoHandler.createTodo();
+            console.log(newTodo);
 
             if (newTodo != null) {
-                todoHandler.todoList.push(newTodo);
+                // todoHandler.todoList.push(newTodo);
                 displayHandler.displayTodo(newTodo, ".all-todos", true);
                 localStorage.setItem(
                     "todo-list",
@@ -684,7 +702,8 @@ const displayHandler = (() => {
             projectHandler.editProject(projectHandler.activeProjectIndex);
         });
 
-    displayAllTodos();
+    // displayAllTodos();
+    // getTodoList();
     displayAllProjects();
     return {
         togglePopUp,
