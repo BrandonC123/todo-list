@@ -1,7 +1,17 @@
 import { id } from "date-fns/locale";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { doc, setDoc, collection, addDoc, getDocs } from "firebase/firestore";
+import {
+    doc,
+    setDoc,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    updateDoc,
+    query,
+    onSnapshot,
+} from "firebase/firestore";
 import {} from "firebase/firestore";
 import {} from "firebase/firestore";
 const firebaseConfig = {
@@ -135,14 +145,33 @@ const todoHandler = (() => {
     let todoCount = 0;
     try {
         getDocs(collection(db, "todos")).then((list) => {
-            todoList = list.docs.map((doc) => {
+            list.docs.map((doc) => {
                 todoList.push({ id: doc.id, ...doc.data() });
             });
             displayHandler.displayAllTodos();
         });
-        todoCount = localStorage.getItem("todo-count");
-        // localStorage.removeItem("todo-count");
-    } catch (e) {}
+        const q = query(collection(db, "todos"));
+        onSnapshot(q, (snapshop) => {
+            snapshop.docChanges().forEach((change) => {
+                if (change.type === "modified") {
+                    const index = todoList
+                        .map(function (todo) {
+                            return todo.id;
+                        })
+                        .indexOf(change.doc.id);
+                    todoList[index] = change.doc.data();
+                }
+                if (change.type === "removed") {
+                    const index = todoList
+                        .map(function (todo) {
+                            return todo.id;
+                        })
+                        .indexOf(change.doc.id);
+                    todoList = todoList.splice(index, 1);
+                }
+            });
+        });
+    } catch {}
 
     let today = new Date()
         .toLocaleString("sv", { timeZoneName: "short" })
@@ -164,19 +193,12 @@ const todoHandler = (() => {
             date: date,
             priority: priority,
             finished: false,
-            todoId: todoCount,
         };
         if (projectIndex === "") {
             try {
-                await addDoc(collection(db, "todos"), {
-                    title: title,
-                    description: description,
-                    date: date,
-                    priority: priority,
-                    finished: false,
-                    todoId: todoCount,
-                });
-                return newTodo;
+                const todoRef = await addDoc(collection(db, "todos"), newTodo);
+                console.log(todoRef.id);
+                return { id: todoRef.id, ...newTodo };
             } catch (error) {
                 console.error(error);
             }
@@ -190,40 +212,26 @@ const todoHandler = (() => {
             return newTodo;
         }
     }
-    function editTodo(id) {
+    async function editTodo(id) {
         const title = document.getElementById("edit-popup-title").value;
         const description = document.getElementById("edit-popup-descr").value;
         const date = document.getElementById("edit-popup-date").value;
         const priority = document.getElementById("edit-popup-priority").value;
-        const updatedtodo = {
+        const todoRef = doc(db, "todos", id);
+        await updateDoc(todoRef, {
             title: title,
             description: description,
             date: date,
             priority: priority,
-            finished: getTodoById(id).todoObj.finished,
-            todoId: getTodoById(id).todoObj.todoId,
-        };
-        const index = getTodoById(id).index;
-        todoList[index] = updatedtodo;
+            id: id,
+        });
         displayHandler.togglePopUp("edit");
-        localStorage.setItem("todo-list", JSON.stringify(todoList));
         displayHandler.clearContainers();
     }
-    function getTodoById(id) {
-        for (let i = 0; i < todoList.length; i++) {
-            if (todoList[i].todoId == id) {
-                const todo = {
-                    todoObj: todoList[i],
-                    index: i,
-                };
-                return todo;
-            }
-        }
-    }
-    function deleteTodo(index) {
-        todoList.splice(index, 1);
+    async function deleteTodo(id) {
+        // todoList.splice(index, 1);
+        await deleteDoc(doc(db, "todos", id));
         displayHandler.clearContainers();
-        localStorage.setItem("todo-list", JSON.stringify(todoList));
     }
     function getUpcoming(inputDate) {
         let today = new Date();
@@ -238,7 +246,6 @@ const todoHandler = (() => {
         todayList,
         todoCount,
         today,
-        getTodoById,
         editTodo,
         deleteTodo,
         getUpcoming,
@@ -266,8 +273,7 @@ const displayHandler = (() => {
         }
     }
     function displayTodo(inputTodo, container, newTodo) {
-        const todoId = inputTodo.todoId;
-        const index = todoHandler.getTodoById(todoId).index;
+        const todoId = inputTodo.id;
         const todo = document.createElement("div");
         todo.classList.add("todo");
 
@@ -337,7 +343,7 @@ const displayHandler = (() => {
         const deleteBtns = document.querySelectorAll(".delete-" + todoId);
         deleteBtns.forEach((btn) => {
             btn.addEventListener("click", function () {
-                todoHandler.deleteTodo(index);
+                todoHandler.deleteTodo(todoId);
             });
         });
         const checkBoxes = document.querySelectorAll(
@@ -358,7 +364,7 @@ const displayHandler = (() => {
         });
     }
     function fillEditPopup(todo) {
-        activeId = todo.todoId;
+        activeId = todo.id;
         document.querySelector(".edit-popup").classList.toggle("hide");
         document.getElementById("edit-popup-title").value = todo.title;
         document.getElementById("edit-popup-date").value = todo.date;
@@ -462,7 +468,7 @@ const displayHandler = (() => {
                     projectHandler.deleteProjectTodo(projectIndex, i);
                 }
                 if (tableId === "today-todo-table") {
-                    const todo = todoHandler.getTodoById(list[i].todoId);
+                    // const todo = todoHandler.getTodoById(list[i].todoId);
                     todoHandler.deleteTodo(todo.index);
                     localStorage.setItem(
                         "todo-list",
@@ -646,12 +652,7 @@ const displayHandler = (() => {
             console.log(newTodo);
 
             if (newTodo != null) {
-                // todoHandler.todoList.push(newTodo);
                 displayHandler.displayTodo(newTodo, ".all-todos", true);
-                localStorage.setItem(
-                    "todo-list",
-                    JSON.stringify(todoHandler.todoList)
-                );
                 fillTodoTable("todo-table", todoHandler.todoList);
                 fillTodoTable("today-todo-table", todoHandler.todayList);
             }
@@ -669,6 +670,7 @@ const displayHandler = (() => {
                 .getElementById("edit-todo")
                 .classList.contains("project-todo-table")
         ) {
+            console.log(activeId);
             todoHandler.editTodo(activeId);
         } else {
             projectHandler.editProjectTodo(
