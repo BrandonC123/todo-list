@@ -34,12 +34,13 @@ const projectHandler = (() => {
     let projectList = [];
     let activeProjectIndex = -1;
     try {
-        projectList = JSON.parse(localStorage.getItem("project-list") || "[]");
-    } catch (e) {}
-    let projectCount =
-        projectList.length != 0
-            ? JSON.parse(projectList[projectList.length - 1].projectId)
-            : 0;
+        getDocs(collection(db, "projects")).then((list) => {
+            list.docs.map((doc) => {
+                projectList.push({ id: doc.id, ...doc.data() });
+            });
+            displayHandler.displayAllProjects();
+        });
+    } catch {}
     async function createProject() {
         const title =
             document.getElementById("project-popup-title").value === ""
@@ -49,30 +50,24 @@ const projectHandler = (() => {
             "project-popup-descr"
         ).value;
         const date = document.getElementById("project-popup-date").value;
-        let todos = [];
-        projectCount++;
         const project = {
             title: title,
             description: description,
             dueDate: date,
-            todos: todos,
-            projectId: projectCount,
+            todos: [],
         };
-        projectList.push(project);
-        localStorage.setItem("project-list", JSON.stringify(projectList));
-        const proj = await addDoc(collection(db, "projects"), {
-            title: title,
-            description: description,
-            dueDate: date,
-            todos: todos,
-            projectId: projectCount,
-        });
+        const projectRef = await addDoc(collection(db, "projects", project));
         displayHandler.displayProject(project, projectList.length - 1);
-        return project;
+        return { id: projectRef.id, ...project };
     }
-    function addtodoToProject(index, todo) {
+    async function addtodoToProject(index, todo) {
+        console.log(index);
         projectList[index].todos.push(todo);
-        localStorage.setItem("project-list", JSON.stringify(projectList));
+        const id = projectList[index].id;
+        const projectRef = doc(db, "projects", id);
+        await updateDoc(projectRef, {
+            todos: projectList[index].todos,
+        });
     }
     function editProject(projectIndex) {
         if (document.getElementById("project-title").value === "") {
@@ -94,6 +89,7 @@ const projectHandler = (() => {
         localStorage.setItem("project-list", JSON.stringify(projectList));
     }
     function editProjectTodo(projectIndex, todoIndex) {
+        const id = projectList[projectIndex].id;
         const title = document.getElementById("edit-popup-title").value;
         const description = document.getElementById("edit-popup-descr").value;
         const date = document.getElementById("edit-popup-date").value;
@@ -103,12 +99,9 @@ const projectHandler = (() => {
             description: description,
             date: date,
             priority: priority,
-            finished: projectList[projectIndex].todos[todoIndex].finished,
-            todoId: projectList[projectIndex].todos[todoIndex].todoId,
         };
         projectList[projectIndex].todos[todoIndex] = updatedtodo;
         displayHandler.togglePopUp("edit");
-        localStorage.setItem("project-list", JSON.stringify(projectList));
         displayHandler.clearContainers();
         displayHandler.fillTodoTable(
             "project-todo-table",
@@ -350,15 +343,15 @@ const displayHandler = (() => {
             ".todo-checkbox-" + todoId
         );
         checkBoxes.forEach((check) => {
-            check.addEventListener("change", function () {
-                todoHandler.todoList[index].finished = check.checked;
-                checkBoxes.forEach((check) => {
-                    check.checked = todoHandler.todoList[index].finished;
+            check.addEventListener("change", async function () {
+                const status = check.checked;
+                const todoRef = doc(db, "todos", inputTodo.id);
+                await updateDoc(todoRef, {
+                    finished: status,
                 });
-                localStorage.setItem(
-                    "todo-list",
-                    JSON.stringify(todoHandler.todoList)
-                );
+                checkBoxes.forEach((otherCheckBoxes) => {
+                    otherCheckBoxes.checked = status;
+                });
                 fillTodoTable("today-todo-table", todoHandler.todayList);
             });
         });
@@ -386,7 +379,7 @@ const displayHandler = (() => {
             let row = table.insertRow();
             let status = row.insertCell(0);
             const checkBox = document.createElement("input");
-            checkBox.classList.add("todo-checkbox-" + list[i].todoId);
+            checkBox.classList.add("todo-checkbox-" + list[i].id);
             checkBox.type = "checkbox";
             checkBox.checked = list[i].finished;
             status.appendChild(checkBox);
@@ -403,7 +396,7 @@ const displayHandler = (() => {
 
             const edit = document.createElement("a");
             edit.classList.add(tableId);
-            edit.classList.add("edit-" + list[i].todoId);
+            edit.classList.add("edit-" + list[i].id);
             edit.classList.add("accent-text");
             edit.textContent = "Edit";
             edit.href = "#";
@@ -419,7 +412,7 @@ const displayHandler = (() => {
                 row.classList.add("finished");
             }
             const checkBoxes = document.querySelectorAll(
-                ".todo-checkbox-" + list[i].todoId
+                ".todo-checkbox-" + list[i].id
             );
             checkBox.addEventListener("change", function () {
                 if (tableId === "todo-table") {
@@ -428,7 +421,6 @@ const displayHandler = (() => {
                         check.checked = list[i].finished;
                     });
                     fillTodoTable("today-todo-table", todoHandler.todayList);
-                    localStorage.setItem("todo-list", JSON.stringify(list));
                 }
                 if (tableId === "project-todo-table") {
                     projectHandler.projectList[projectIndex].todos[i].finished =
@@ -439,16 +431,12 @@ const displayHandler = (() => {
                     );
                 }
                 if (tableId === "today-todo-table") {
-                    const todo = todoHandler.getTodoById(list[i].todoId);
+                    const todo = todoHandler.getTodoById(list[i].id);
                     todoHandler.todoList[todo.index].finished =
                         checkBox.checked;
                     checkBoxes.forEach((check) => {
                         check.checked = list[i].finished;
                     });
-                    localStorage.setItem(
-                        "todo-list",
-                        JSON.stringify(todoHandler.todoList)
-                    );
                 }
                 row.classList.toggle("finished");
             });
@@ -461,19 +449,10 @@ const displayHandler = (() => {
                 }
             });
             deleteBtn.addEventListener("click", function () {
-                if (tableId === "todo-table") {
-                    todoHandler.deleteTodo(i);
-                }
                 if (tableId === "project-todo-table") {
-                    projectHandler.deleteProjectTodo(projectIndex, i);
-                }
-                if (tableId === "today-todo-table") {
-                    // const todo = todoHandler.getTodoById(list[i].todoId);
-                    todoHandler.deleteTodo(todo.index);
-                    localStorage.setItem(
-                        "todo-list",
-                        JSON.stringify(todoHandler.todoList)
-                    );
+                    projectHandler.deleteProjectTodo(projectIndex, list[i].id);
+                } else {
+                    todoHandler.deleteTodo(list[i].id);
                 }
             });
             actions.appendChild(edit);
@@ -703,10 +682,6 @@ const displayHandler = (() => {
         .addEventListener("input", function () {
             projectHandler.editProject(projectHandler.activeProjectIndex);
         });
-
-    // displayAllTodos();
-    // getTodoList();
-    displayAllProjects();
     return {
         togglePopUp,
         displayTodo,
