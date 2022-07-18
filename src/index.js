@@ -1,9 +1,9 @@
+import uniqid from "uniqid";
 import { id } from "date-fns/locale";
-import { initializeApp } from "firebase/app";
+import { FirebaseError, initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import {
     doc,
-    setDoc,
     collection,
     addDoc,
     getDocs,
@@ -63,12 +63,9 @@ const projectHandler = (() => {
             );
             displayHandler.displayProject(project, projectList.length - 1);
             return { id: projectRef.id, ...project };
-        } catch {
-            console.error(error);
-        }
+        } catch {}
     }
-    async function addtodoToProject(index, todo) {
-        console.log(index);
+    async function addTodoToProject(index, todo) {
         projectList[index].todos.push(todo);
         const id = projectList[index].id;
         const projectRef = doc(db, "projects", id);
@@ -99,7 +96,7 @@ const projectHandler = (() => {
         projectList.splice(index, 1);
         displayHandler.clearContainers();
     }
-    function editProjectTodo(projectIndex, todoIndex) {
+    async function editProjectTodo(projectIndex, todoIndex) {
         const id = projectList[projectIndex].id;
         const title = document.getElementById("edit-popup-title").value;
         const description = document.getElementById("edit-popup-descr").value;
@@ -112,6 +109,10 @@ const projectHandler = (() => {
             priority: priority,
         };
         projectList[projectIndex].todos[todoIndex] = updatedtodo;
+        const projectRef = doc(db, "projects", id);
+        await updateDoc(projectRef, {
+            todos: projectList[projectIndex].todos,
+        });
         displayHandler.togglePopUp("edit");
         displayHandler.clearContainers();
         displayHandler.fillTodoTable(
@@ -121,10 +122,13 @@ const projectHandler = (() => {
         );
         projectHandler.activeProjectIndex = -1;
     }
-    function deleteProjectTodo(projectIndex, todoIndex) {
+    async function deleteProjectTodo(projectIndex, todoIndex) {
         projectList[projectIndex].todos.splice(todoIndex, 1);
+        const projectRef = doc(db, "projects", projectList[projectIndex].id);
+        await updateDoc(projectRef, {
+            todos: projectList[projectIndex].todos,
+        });
         displayHandler.clearContainers();
-        localStorage.setItem("project-list", JSON.stringify(projectList));
         displayHandler.fillTodoTable(
             "project-todo-table",
             projectList[projectIndex].todos,
@@ -134,7 +138,7 @@ const projectHandler = (() => {
     return {
         createProject,
         projectList,
-        addtodoToProject,
+        addTodoToProject,
         editProject,
         deleteProject,
         activeProjectIndex,
@@ -171,7 +175,7 @@ const todoHandler = (() => {
                             return todo.id;
                         })
                         .indexOf(change.doc.id);
-                    todoList = todoList.splice(index, 1);
+                    todoList.splice(index, 1);
                 }
             });
         });
@@ -189,7 +193,6 @@ const todoHandler = (() => {
         const date = document.getElementById("popup-date").value;
         const priority = document.getElementById("popup-priority").value;
         const projectIndex = document.getElementById("project-options").value;
-        localStorage.setItem("todo-count", todoCount);
         const newTodo = {
             title: title,
             description: description,
@@ -201,17 +204,20 @@ const todoHandler = (() => {
             try {
                 const todoRef = await addDoc(collection(db, "todos"), newTodo);
                 return { id: todoRef.id, ...newTodo };
-            } catch (error) {
-                console.error(error);
-            }
+            } catch (error) {}
         } else {
-            projectHandler.addtodoToProject(projectIndex, newTodo);
+            projectHandler.addTodoToProject(projectIndex, {
+                id: uniqid(),
+                ...newTodo,
+            });
             displayHandler.fillTodoTable(
                 "project-todo-table",
                 projectHandler.projectList[projectIndex].todos,
                 projectIndex
             );
-            return newTodo;
+            // Return null if todo is project is a part of project. No need
+            // to display in any cards
+            return null;
         }
     }
     async function editTodo(id) {
@@ -355,6 +361,7 @@ const displayHandler = (() => {
             check.addEventListener("change", async function () {
                 const status = check.checked;
                 const todoRef = doc(db, "todos", inputTodo.id);
+
                 await updateDoc(todoRef, {
                     finished: status,
                 });
@@ -374,7 +381,6 @@ const displayHandler = (() => {
         document.getElementById("edit-popup-priority").value = todo.priority;
     }
     function displayAllTodos() {
-        console.log(todoHandler.todoList);
         todoHandler.todoList.forEach((element) => {
             displayTodo(element, ".all-todos");
         });
@@ -434,10 +440,6 @@ const displayHandler = (() => {
                 if (tableId === "project-todo-table") {
                     projectHandler.projectList[projectIndex].todos[i].finished =
                         checkBox.checked;
-                    localStorage.setItem(
-                        "project-list",
-                        JSON.stringify(projectHandler.projectList)
-                    );
                 }
                 if (tableId === "today-todo-table") {
                     const index = todoHandler.todoList
@@ -445,7 +447,6 @@ const displayHandler = (() => {
                             return todo.id;
                         })
                         .indexOf(list[i].id);
-                    console.log(todoHandler.todoList);
                     todoHandler.todoList[index].finished = checkBox.checked;
                     const todoRef = doc(db, "todos", list[i].id);
                     await updateDoc(todoRef, {
@@ -645,12 +646,10 @@ const displayHandler = (() => {
         .getElementById("create-todo")
         .addEventListener("click", async function () {
             let newTodo = await todoHandler.createTodo();
-            console.log(newTodo);
 
             if (newTodo != null) {
                 displayHandler.displayTodo(newTodo, ".all-todos", true);
                 todoHandler.todoList.push(newTodo);
-                console.log(todoHandler.todayList);
                 fillTodoTable("todo-table", todoHandler.todoList);
                 fillTodoTable("today-todo-table", todoHandler.todayList);
             }
@@ -668,7 +667,6 @@ const displayHandler = (() => {
                 .getElementById("edit-todo")
                 .classList.contains("project-todo-table")
         ) {
-            console.log(activeId);
             todoHandler.editTodo(activeId);
         } else {
             projectHandler.editProjectTodo(
