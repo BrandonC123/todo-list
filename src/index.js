@@ -56,9 +56,16 @@ const projectHandler = (() => {
             dueDate: date,
             todos: [],
         };
-        const projectRef = await addDoc(collection(db, "projects", project));
-        displayHandler.displayProject(project, projectList.length - 1);
-        return { id: projectRef.id, ...project };
+        try {
+            const projectRef = await addDoc(
+                collection(db, "projects"),
+                project
+            );
+            displayHandler.displayProject(project, projectList.length - 1);
+            return { id: projectRef.id, ...project };
+        } catch {
+            console.error(error);
+        }
     }
     async function addtodoToProject(index, todo) {
         console.log(index);
@@ -69,24 +76,28 @@ const projectHandler = (() => {
             todos: projectList[index].todos,
         });
     }
-    function editProject(projectIndex) {
-        if (document.getElementById("project-title").value === "") {
-            projectList[projectIndex].title = "Untitled Project";
-        } else {
-            projectList[projectIndex].title =
-                document.getElementById("project-title").value;
-        }
-
-        projectList[projectIndex].description = document.getElementById(
+    async function editProject(projectIndex) {
+        const title = document.getElementById("project-title").value;
+        const description = document.getElementById(
             "project-description"
         ).value;
+        if (title === "") {
+            projectList[projectIndex].title = "Untitled Project";
+        } else {
+            projectList[projectIndex].title = title;
+        }
+        projectList[projectIndex].description = description;
+        const projectRef = doc(db, "projects", projectList[projectIndex].id);
+        await updateDoc(projectRef, {
+            title: projectList[projectIndex].title,
+            description: projectList[projectIndex].description,
+        });
         displayHandler.clearContainers();
-        localStorage.setItem("project-list", JSON.stringify(projectList));
     }
-    function deleteProject(index) {
+    async function deleteProject(index) {
+        await deleteDoc(doc(db, "projects", projectList[index].id));
         projectList.splice(index, 1);
         displayHandler.clearContainers();
-        localStorage.setItem("project-list", JSON.stringify(projectList));
     }
     function editProjectTodo(projectIndex, todoIndex) {
         const id = projectList[projectIndex].id;
@@ -178,7 +189,6 @@ const todoHandler = (() => {
         const date = document.getElementById("popup-date").value;
         const priority = document.getElementById("popup-priority").value;
         const projectIndex = document.getElementById("project-options").value;
-        todoCount++;
         localStorage.setItem("todo-count", todoCount);
         const newTodo = {
             title: title,
@@ -190,7 +200,6 @@ const todoHandler = (() => {
         if (projectIndex === "") {
             try {
                 const todoRef = await addDoc(collection(db, "todos"), newTodo);
-                console.log(todoRef.id);
                 return { id: todoRef.id, ...newTodo };
             } catch (error) {
                 console.error(error);
@@ -404,7 +413,7 @@ const displayHandler = (() => {
             const deleteBtn = document.createElement("a");
             deleteBtn.classList.add(tableId);
             deleteBtn.classList.add("danger-text");
-            deleteBtn.classList.add("delete-");
+            deleteBtn.classList.add("delete-" + list[i].id);
             deleteBtn.textContent = "Delete";
             deleteBtn.href = "#";
 
@@ -414,7 +423,7 @@ const displayHandler = (() => {
             const checkBoxes = document.querySelectorAll(
                 ".todo-checkbox-" + list[i].id
             );
-            checkBox.addEventListener("change", function () {
+            checkBox.addEventListener("change", async function () {
                 if (tableId === "todo-table") {
                     list[i].finished = checkBox.checked;
                     checkBoxes.forEach((check) => {
@@ -431,9 +440,17 @@ const displayHandler = (() => {
                     );
                 }
                 if (tableId === "today-todo-table") {
-                    const todo = todoHandler.getTodoById(list[i].id);
-                    todoHandler.todoList[todo.index].finished =
-                        checkBox.checked;
+                    const index = todoHandler.todoList
+                        .map(function (todo) {
+                            return todo.id;
+                        })
+                        .indexOf(list[i].id);
+                    console.log(todoHandler.todoList);
+                    todoHandler.todoList[index].finished = checkBox.checked;
+                    const todoRef = doc(db, "todos", list[i].id);
+                    await updateDoc(todoRef, {
+                        finished: checkBox.checked,
+                    });
                     checkBoxes.forEach((check) => {
                         check.checked = list[i].finished;
                     });
@@ -632,6 +649,8 @@ const displayHandler = (() => {
 
             if (newTodo != null) {
                 displayHandler.displayTodo(newTodo, ".all-todos", true);
+                todoHandler.todoList.push(newTodo);
+                console.log(todoHandler.todayList);
                 fillTodoTable("todo-table", todoHandler.todoList);
                 fillTodoTable("today-todo-table", todoHandler.todayList);
             }
@@ -668,8 +687,10 @@ const displayHandler = (() => {
         });
     document
         .getElementById("create-project")
-        .addEventListener("click", function () {
-            projectHandler.createProject();
+        .addEventListener("click", async function () {
+            const project = await projectHandler.createProject();
+            projectHandler.projectList.push(project);
+            fillProjectDropdown();
             togglePopUp("close");
         });
     document
