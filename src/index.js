@@ -365,13 +365,19 @@ const displayHandler = (() => {
             check.addEventListener("change", async function () {
                 const status = check.checked;
                 const todoRef = doc(db, "todos", inputTodo.id);
-
                 await updateDoc(todoRef, {
                     finished: status,
                 });
                 checkBoxes.forEach((otherCheckBoxes) => {
                     otherCheckBoxes.checked = status;
                 });
+                // Update todo listing in today-todo-table
+                const todayIndex = todoHandler.todayList
+                    .map(function (todo) {
+                        return todo.id;
+                    })
+                    .indexOf(inputTodo.id);
+                todoHandler.todayList[todayIndex].finished = status;
                 fillTodoTable("today-todo-table", todoHandler.todayList);
             });
         });
@@ -442,6 +448,7 @@ const displayHandler = (() => {
                     });
                     const todoRef = doc(db, "todos", list[i].id);
                     await updateDoc(todoRef, {
+                        id: list[i].id,
                         finished: status,
                     });
                     fillTodoTable("today-todo-table", todoHandler.todayList);
@@ -459,15 +466,17 @@ const displayHandler = (() => {
                     });
                 }
                 if (tableId === "today-todo-table") {
+                    list[i].finished = status;
                     const index = todoHandler.todoList
                         .map(function (todo) {
                             return todo.id;
                         })
                         .indexOf(list[i].id);
                     console.log(list);
-                    todoHandler.todoList[index].finished = status;
+                    todoHandler.todoList[index].finished = checkBox.checked;
                     const todoRef = doc(db, "todos", list[i].id);
                     await updateDoc(todoRef, {
+                        id: list[i].id,
                         finished: checkBox.checked,
                     });
                     checkBoxes.forEach((otherCheckBoxes) => {
