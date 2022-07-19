@@ -1,3 +1,31 @@
+import uniqid from "uniqid";
+import { initializeApp } from "firebase/app";
+import { getFirestore, setDoc } from "firebase/firestore";
+import {
+    doc,
+    collection,
+    getDocs,
+    deleteDoc,
+    updateDoc,
+    query,
+    onSnapshot,
+} from "firebase/firestore";
+import {} from "firebase/firestore";
+import {} from "firebase/firestore";
+const firebaseConfig = {
+    apiKey: "AIzaSyAxQ8hAUlNRWOi836iNrHQsmMUv18gSP14",
+    authDomain: "todo-list-f9f8d.firebaseapp.com",
+    projectId: "todo-list-f9f8d",
+    storageBucket: "todo-list-f9f8d.appspot.com",
+    messagingSenderId: "412734533537",
+    appId: "1:412734533537:web:b7bbfa60152eac743d65e0",
+    measurementId: "G-CKR6JVLF99",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const { differenceInCalendarDays } = require("date-fns");
 
 const projectHandler = (() => {
@@ -5,14 +33,14 @@ const projectHandler = (() => {
     let activeProjectIndex = -1;
     let projectCount;
     try {
-        projectList = JSON.parse(localStorage.getItem("project-list") || "[]");
-        projectCount =
-            projectList.length != 0
-                ? JSON.parse(projectList[projectList.length - 1].projectId)
-                : 0;
-    } catch (e) {}
-
-    function createProject() {
+        getDocs(collection(db, "projects")).then((list) => {
+            list.docs.map((doc) => {
+                projectList.push(doc.data());
+            });
+            displayHandler.displayAllProjects();
+        });
+    } catch {}
+    async function createProject() {
         const title =
             document.getElementById("project-popup-title").value === ""
                 ? "Untitled Project"
@@ -21,44 +49,55 @@ const projectHandler = (() => {
             "project-popup-descr"
         ).value;
         const date = document.getElementById("project-popup-date").value;
-        let todos = [];
-        projectCount++;
+        const id = "project-" + uniqid();
         const project = {
             title: title,
             description: description,
             dueDate: date,
-            todos: todos,
-            projectId: projectCount,
+            todos: [],
+            id: id,
         };
-        projectList.push(project);
-        localStorage.setItem("project-list", JSON.stringify(projectList));
-        displayHandler.displayProject(project, projectList.length - 1);
-        return project;
+        try {
+            await setDoc(doc(db, "projects", id), project);
+            return project;
+        } catch {}
     }
-    function addtodoToProject(index, todo) {
+    async function addTodoToProject(index, todo) {
         projectList[index].todos.push(todo);
-        localStorage.setItem("project-list", JSON.stringify(projectList));
+        const id = projectList[index].id;
+        const projectRef = doc(db, "projects", id);
+        await updateDoc(projectRef, {
+            todos: projectList[index].todos,
+        });
     }
-    function editProject(projectIndex) {
-        if (document.getElementById("project-title").value === "") {
-            projectList[projectIndex].title = "Untitled Project";
-        } else {
-            projectList[projectIndex].title =
-                document.getElementById("project-title").value;
-        }
-
-        projectList[projectIndex].description = document.getElementById(
+    async function editProject(projectIndex) {
+        const title = document.getElementById("project-title").value;
+        const description = document.getElementById(
             "project-description"
         ).value;
+        const date = document.getElementById("project-due-date").value;
+        if (title === "") {
+            projectList[projectIndex].title = "Untitled Project";
+        } else {
+            projectList[projectIndex].title = title;
+        }
+        projectList[projectIndex].description = description;
+        projectList[projectIndex].dueDate = date;
+        const projectRef = doc(db, "projects", projectList[projectIndex].id);
+        await updateDoc(projectRef, {
+            title: projectList[projectIndex].title,
+            description: projectList[projectIndex].description,
+            dueDate: projectList[projectIndex].dueDate,
+        });
         displayHandler.clearContainers();
-        localStorage.setItem("project-list", JSON.stringify(projectList));
     }
-    function deleteProject(index) {
+    async function deleteProject(index) {
+        await deleteDoc(doc(db, "projects", projectList[index].id));
         projectList.splice(index, 1);
         displayHandler.clearContainers();
-        localStorage.setItem("project-list", JSON.stringify(projectList));
     }
-    function editProjectTodo(projectIndex, todoIndex) {
+    async function editProjectTodo(projectIndex, todoIndex) {
+        const id = projectList[projectIndex].id;
         const title = document.getElementById("edit-popup-title").value;
         const description = document.getElementById("edit-popup-descr").value;
         const date = document.getElementById("edit-popup-date").value;
@@ -68,12 +107,13 @@ const projectHandler = (() => {
             description: description,
             date: date,
             priority: priority,
-            finished: projectList[projectIndex].todos[todoIndex].finished,
-            todoId: projectList[projectIndex].todos[todoIndex].todoId,
         };
         projectList[projectIndex].todos[todoIndex] = updatedtodo;
+        const projectRef = doc(db, "projects", id);
+        await updateDoc(projectRef, {
+            todos: projectList[projectIndex].todos,
+        });
         displayHandler.togglePopUp("edit");
-        localStorage.setItem("project-list", JSON.stringify(projectList));
         displayHandler.clearContainers();
         displayHandler.fillTodoTable(
             "project-todo-table",
@@ -82,10 +122,13 @@ const projectHandler = (() => {
         );
         projectHandler.activeProjectIndex = -1;
     }
-    function deleteProjectTodo(projectIndex, todoIndex) {
+    async function deleteProjectTodo(projectIndex, todoIndex) {
         projectList[projectIndex].todos.splice(todoIndex, 1);
+        const projectRef = doc(db, "projects", projectList[projectIndex].id);
+        await updateDoc(projectRef, {
+            todos: projectList[projectIndex].todos,
+        });
         displayHandler.clearContainers();
-        localStorage.setItem("project-list", JSON.stringify(projectList));
         displayHandler.fillTodoTable(
             "project-todo-table",
             projectList[projectIndex].todos,
@@ -95,7 +138,7 @@ const projectHandler = (() => {
     return {
         createProject,
         projectList,
-        addtodoToProject,
+        addTodoToProject,
         editProject,
         deleteProject,
         activeProjectIndex,
@@ -109,15 +152,40 @@ const todoHandler = (() => {
     let todayList = [];
     let todoCount = 0;
     try {
-        todoList = JSON.parse(localStorage.getItem("todo-list") || "[]");
-        todoCount = localStorage.getItem("todo-count");
-        // localStorage.removeItem("todo-count");
-    } catch (e) {}
+        getDocs(collection(db, "todos")).then((list) => {
+            list.docs.map((doc) => {
+                todoList.push(doc.data());
+            });
+            displayHandler.displayAllTodos();
+        });
+        const q = query(collection(db, "todos"));
+        // Listen for when todos have been updated/deleted and update accordingly
+        onSnapshot(q, (snapshop) => {
+            snapshop.docChanges().forEach((change) => {
+                if (change.type === "modified") {
+                    const index = todoList
+                        .map(function (todo) {
+                            return todo.id;
+                        })
+                        .indexOf(change.doc.id);
+                    todoList[index] = change.doc.data();
+                }
+                if (change.type === "removed") {
+                    const index = todoList
+                        .map(function (todo) {
+                            return todo.id;
+                        })
+                        .indexOf(change.doc.id);
+                    todoList.splice(index, 1);
+                }
+            });
+        });
+    } catch {}
 
     let today = new Date()
         .toLocaleString("sv", { timeZoneName: "short" })
         .slice(0, 10);
-    function createTodo() {
+    async function createTodo() {
         const title =
             document.getElementById("popup-title").value === ""
                 ? "Untitled ToDo"
@@ -126,61 +194,55 @@ const todoHandler = (() => {
         const date = document.getElementById("popup-date").value;
         const priority = document.getElementById("popup-priority").value;
         const projectIndex = document.getElementById("project-options").value;
-        todoCount++;
-        localStorage.setItem("todo-count", todoCount);
+        const id = "todo-" + uniqid();
         const newTodo = {
             title: title,
             description: description,
             date: date,
             priority: priority,
             finished: false,
-            todoId: todoCount,
+            id: id,
         };
         if (projectIndex === "") {
-            return newTodo;
+            try {
+                await setDoc(doc(db, "todos", id), newTodo);
+                return newTodo;
+            } catch (error) {}
         } else {
-            projectHandler.addtodoToProject(projectIndex, newTodo);
+            projectHandler.addTodoToProject(projectIndex, {
+                id: uniqid(),
+                ...newTodo,
+            });
             displayHandler.fillTodoTable(
                 "project-todo-table",
                 projectHandler.projectList[projectIndex].todos,
                 projectIndex
             );
+            // Return null if todo is project is a part of project. No need
+            // to display in any cards
+            return null;
         }
     }
-    function editTodo(id) {
+    async function editTodo(id) {
         const title = document.getElementById("edit-popup-title").value;
         const description = document.getElementById("edit-popup-descr").value;
         const date = document.getElementById("edit-popup-date").value;
         const priority = document.getElementById("edit-popup-priority").value;
-        const updatedtodo = {
+        const todoRef = doc(db, "todos", id);
+        await updateDoc(todoRef, {
             title: title,
             description: description,
             date: date,
             priority: priority,
-            finished: getTodoById(id).todoObj.finished,
-            todoId: getTodoById(id).todoObj.todoId,
-        };
-        const index = getTodoById(id).index;
-        todoList[index] = updatedtodo;
+            id: id,
+        });
         displayHandler.togglePopUp("edit");
-        localStorage.setItem("todo-list", JSON.stringify(todoList));
         displayHandler.clearContainers();
     }
-    function getTodoById(id) {
-        for (let i = 0; i < todoList.length; i++) {
-            if (todoList[i].todoId == id) {
-                const todo = {
-                    todoObj: todoList[i],
-                    index: i,
-                };
-                return todo;
-            }
-        }
-    }
-    function deleteTodo(index) {
-        todoList.splice(index, 1);
+    async function deleteTodo(id) {
+        // todoList.splice(index, 1);
+        await deleteDoc(doc(db, "todos", id));
         displayHandler.clearContainers();
-        localStorage.setItem("todo-list", JSON.stringify(todoList));
     }
     function getUpcoming(inputDate) {
         let today = new Date();
@@ -188,13 +250,13 @@ const todoHandler = (() => {
         let result = differenceInCalendarDays(testDate, today);
         return result <= 7 && result >= 0 ? true : false;
     }
+
     return {
         createTodo,
         todoList,
         todayList,
         todoCount,
         today,
-        getTodoById,
         editTodo,
         deleteTodo,
         getUpcoming,
@@ -221,8 +283,7 @@ const displayHandler = (() => {
         }
     }
     function displayTodo(inputTodo, container, newTodo) {
-        const todoId = inputTodo.todoId;
-        const index = todoHandler.getTodoById(todoId).index;
+        const todoId = inputTodo.id;
         const todo = document.createElement("div");
         todo.classList.add("todo");
 
@@ -232,11 +293,13 @@ const displayHandler = (() => {
         checkBox.checked = inputTodo.finished ? true : false;
 
         const todoTitle = document.createElement("input");
+        todoTitle.readOnly = true;
         todoTitle.type = "text";
         todoTitle.placeholder = "Title";
         todoTitle.value = inputTodo.title;
 
         const calendar = document.createElement("input");
+        calendar.readOnly = true;
         calendar.type = "date";
         calendar.value = inputTodo.date;
 
@@ -292,29 +355,40 @@ const displayHandler = (() => {
         const deleteBtns = document.querySelectorAll(".delete-" + todoId);
         deleteBtns.forEach((btn) => {
             btn.addEventListener("click", function () {
-                todoHandler.deleteTodo(index);
+                todoHandler.deleteTodo(todoId);
             });
         });
         const checkBoxes = document.querySelectorAll(
             ".todo-checkbox-" + todoId
         );
         checkBoxes.forEach((check) => {
-            check.addEventListener("change", function () {
-                console.log(checkBoxes);
-                todoHandler.todoList[index].finished = check.checked;
-                checkBoxes.forEach((check) => {
-                    check.checked = todoHandler.todoList[index].finished;
+            check.addEventListener("change", async function () {
+                const status = check.checked;
+                const todoRef = doc(db, "todos", inputTodo.id);
+                await updateDoc(todoRef, {
+                    id: inputTodo.id,
+                    finished: status,
                 });
-                localStorage.setItem(
-                    "todo-list",
-                    JSON.stringify(todoHandler.todoList)
-                );
-                fillTodoTable("today-todo-table", todoHandler.todayList);
+                checkBoxes.forEach((otherCheckBoxes) => {
+                    otherCheckBoxes.checked = status;
+                });
+                // Update todo listing in today-todo-table
+                if (
+                    inputTodo.date.toString() === todoHandler.today.toString()
+                ) {
+                    const todayIndex = todoHandler.todayList
+                        .map(function (todo) {
+                            return todo.id;
+                        })
+                        .indexOf(inputTodo.id);
+                    todoHandler.todayList[todayIndex].finished = status;
+                    fillTodoTable("today-todo-table", todoHandler.todayList);
+                }
             });
         });
     }
     function fillEditPopup(todo) {
-        activeId = todo.todoId;
+        activeId = todo.id;
         document.querySelector(".edit-popup").classList.toggle("hide");
         document.getElementById("edit-popup-title").value = todo.title;
         document.getElementById("edit-popup-date").value = todo.date;
@@ -335,7 +409,7 @@ const displayHandler = (() => {
             let row = table.insertRow();
             let status = row.insertCell(0);
             const checkBox = document.createElement("input");
-            checkBox.classList.add("todo-checkbox-" + list[i].todoId);
+            checkBox.classList.add("todo-checkbox-" + list[i].id);
             checkBox.type = "checkbox";
             checkBox.checked = list[i].finished;
             status.appendChild(checkBox);
@@ -352,7 +426,7 @@ const displayHandler = (() => {
 
             const edit = document.createElement("a");
             edit.classList.add(tableId);
-            edit.classList.add("edit-" + list[i].todoId);
+            edit.classList.add("edit-" + list[i].id);
             edit.classList.add("accent-text");
             edit.textContent = "Edit";
             edit.href = "#";
@@ -360,7 +434,7 @@ const displayHandler = (() => {
             const deleteBtn = document.createElement("a");
             deleteBtn.classList.add(tableId);
             deleteBtn.classList.add("danger-text");
-            deleteBtn.classList.add("delete-");
+            deleteBtn.classList.add("delete-" + list[i].id);
             deleteBtn.textContent = "Delete";
             deleteBtn.href = "#";
 
@@ -368,36 +442,51 @@ const displayHandler = (() => {
                 row.classList.add("finished");
             }
             const checkBoxes = document.querySelectorAll(
-                ".todo-checkbox-" + list[i].todoId
+                ".todo-checkbox-" + list[i].id
             );
-            checkBox.addEventListener("change", function () {
+            checkBox.addEventListener("change", async function () {
+                const status = checkBox.checked;
                 if (tableId === "todo-table") {
-                    list[i].finished = checkBox.checked;
+                    list[i].finished = status;
                     checkBoxes.forEach((check) => {
                         check.checked = list[i].finished;
                     });
+                    const todoRef = doc(db, "todos", list[i].id);
+                    await updateDoc(todoRef, {
+                        id: list[i].id,
+                        finished: status,
+                    });
                     fillTodoTable("today-todo-table", todoHandler.todayList);
-                    localStorage.setItem("todo-list", JSON.stringify(list));
                 }
                 if (tableId === "project-todo-table") {
                     projectHandler.projectList[projectIndex].todos[i].finished =
-                        checkBox.checked;
-                    localStorage.setItem(
-                        "project-list",
-                        JSON.stringify(projectHandler.projectList)
+                        status;
+                    const projectRef = doc(
+                        db,
+                        "projects",
+                        projectHandler.projectList[projectIndex].id
                     );
+                    await updateDoc(projectRef, {
+                        todos: projectHandler.projectList[projectIndex].todos,
+                    });
                 }
                 if (tableId === "today-todo-table") {
-                    const todo = todoHandler.getTodoById(list[i].todoId);
-                    todoHandler.todoList[todo.index].finished =
-                        checkBox.checked;
-                    checkBoxes.forEach((check) => {
-                        check.checked = list[i].finished;
+                    list[i].finished = status;
+                    const index = todoHandler.todoList
+                        .map(function (todo) {
+                            return todo.id;
+                        })
+                        .indexOf(list[i].id);
+                    todoHandler.todoList[index].finished = checkBox.checked;
+                    const todoRef = doc(db, "todos", list[i].id);
+                    await updateDoc(todoRef, {
+                        id: list[i].id,
+                        finished: checkBox.checked,
                     });
-                    localStorage.setItem(
-                        "todo-list",
-                        JSON.stringify(todoHandler.todoList)
-                    );
+                    checkBoxes.forEach((otherCheckBoxes) => {
+                        otherCheckBoxes.checked = list[i].finished;
+                    });
+                    fillTodoTable("todo-table", todoHandler.todoList);
                 }
                 row.classList.toggle("finished");
             });
@@ -410,19 +499,10 @@ const displayHandler = (() => {
                 }
             });
             deleteBtn.addEventListener("click", function () {
-                if (tableId === "todo-table") {
-                    todoHandler.deleteTodo(i);
-                }
                 if (tableId === "project-todo-table") {
-                    projectHandler.deleteProjectTodo(projectIndex, i);
-                }
-                if (tableId === "today-todo-table") {
-                    const todo = todoHandler.getTodoById(list[i].todoId);
-                    todoHandler.deleteTodo(todo.index);
-                    localStorage.setItem(
-                        "todo-list",
-                        JSON.stringify(todoHandler.todoList)
-                    );
+                    projectHandler.deleteProjectTodo(projectIndex, list[i].id);
+                } else {
+                    todoHandler.deleteTodo(list[i].id);
                 }
             });
             actions.appendChild(edit);
@@ -479,6 +559,12 @@ const displayHandler = (() => {
         a.href = "#";
         a.textContent = inputProject.title;
 
+        const dueDate = document.createElement("input");
+        dueDate.readOnly = true;
+        dueDate.classList.add("project-due-date");
+        dueDate.type = "date";
+        dueDate.value = inputProject.dueDate;
+
         const deleteBtn = document.createElement("a");
         deleteBtn.classList.add("danger-text");
         deleteBtn.classList.add("delete-project-" + index);
@@ -490,9 +576,13 @@ const displayHandler = (() => {
         projectContainers.forEach((projectContainer) => {
             if (!projectContainer.classList.contains("project-tab")) {
                 projectDiv.classList.add("project-row");
+                if (projectContainer.classList.contains("all-projects-page")) {
+                    projectDiv.appendChild(dueDate);
+                }
                 projectDiv.appendChild(deleteBtn);
                 a.classList.add("accent-text");
             }
+
             projectContainer.appendChild(projectDiv.cloneNode(true));
         });
         const projectLinks = document.querySelectorAll(
@@ -543,6 +633,8 @@ const displayHandler = (() => {
             "project-description"
         );
         projectDescription.value = projectList[index].description;
+        const projectDueDate = document.getElementById("project-due-date");
+        projectDueDate.value = projectList[index].dueDate;
 
         const projectTodos = projectHandler.projectList[index].todos;
         fillTodoTable("project-todo-table", projectTodos, index);
@@ -596,16 +688,12 @@ const displayHandler = (() => {
         });
     document
         .getElementById("create-todo")
-        .addEventListener("click", function () {
-            let newTodo = todoHandler.createTodo();
+        .addEventListener("click", async function () {
+            let newTodo = await todoHandler.createTodo();
 
             if (newTodo != null) {
-                todoHandler.todoList.push(newTodo);
                 displayHandler.displayTodo(newTodo, ".all-todos", true);
-                localStorage.setItem(
-                    "todo-list",
-                    JSON.stringify(todoHandler.todoList)
-                );
+                todoHandler.todoList.push(newTodo);
                 fillTodoTable("todo-table", todoHandler.todoList);
                 fillTodoTable("today-todo-table", todoHandler.todayList);
             }
@@ -641,10 +729,15 @@ const displayHandler = (() => {
         });
     document
         .getElementById("create-project")
-        .addEventListener("click", function () {
-            projectHandler.createProject();
+        .addEventListener("click", async function () {
+            const project = await projectHandler.createProject();
+            projectHandler.projectList.push(project);
+            displayProject(project, projectHandler.projectList.length - 1);
+            fillProjectDropdown();
             togglePopUp("close");
+            document.getElementById("project-popup-form").reset();
         });
+    // Listen for when changes are being to project values
     document
         .getElementById("project-title")
         .addEventListener("input", function () {
@@ -655,9 +748,11 @@ const displayHandler = (() => {
         .addEventListener("input", function () {
             projectHandler.editProject(projectHandler.activeProjectIndex);
         });
-
-    displayAllTodos();
-    displayAllProjects();
+    document
+        .getElementById("project-due-date")
+        .addEventListener("input", function () {
+            projectHandler.editProject(projectHandler.activeProjectIndex);
+        });
     return {
         togglePopUp,
         displayTodo,
