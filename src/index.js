@@ -1,11 +1,9 @@
 import uniqid from "uniqid";
-import { id } from "date-fns/locale";
-import { FirebaseError, initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp } from "firebase/app";
+import { getFirestore, setDoc } from "firebase/firestore";
 import {
     doc,
     collection,
-    addDoc,
     getDocs,
     deleteDoc,
     updateDoc,
@@ -36,7 +34,7 @@ const projectHandler = (() => {
     try {
         getDocs(collection(db, "projects")).then((list) => {
             list.docs.map((doc) => {
-                projectList.push({ id: doc.id, ...doc.data() });
+                projectList.push(doc.data());
             });
             displayHandler.displayAllProjects();
         });
@@ -50,19 +48,17 @@ const projectHandler = (() => {
             "project-popup-descr"
         ).value;
         const date = document.getElementById("project-popup-date").value;
+        const id = "project-" + uniqid();
         const project = {
             title: title,
             description: description,
             dueDate: date,
             todos: [],
+            id: id,
         };
         try {
-            const projectRef = await addDoc(
-                collection(db, "projects"),
-                project
-            );
-            displayHandler.displayProject(project, projectList.length - 1);
-            return { id: projectRef.id, ...project };
+            await setDoc(doc(db, "projects", id), project);
+            return project;
         } catch {}
     }
     async function addTodoToProject(index, todo) {
@@ -86,7 +82,6 @@ const projectHandler = (() => {
         }
         projectList[projectIndex].description = description;
         projectList[projectIndex].dueDate = date;
-        console.log(projectList[projectIndex]);
         const projectRef = doc(db, "projects", projectList[projectIndex].id);
         await updateDoc(projectRef, {
             title: projectList[projectIndex].title,
@@ -158,11 +153,12 @@ const todoHandler = (() => {
     try {
         getDocs(collection(db, "todos")).then((list) => {
             list.docs.map((doc) => {
-                todoList.push({ id: doc.id, ...doc.data() });
+                todoList.push(doc.data());
             });
             displayHandler.displayAllTodos();
         });
         const q = query(collection(db, "todos"));
+        // Listen for when todos have been updated/deleted and update accordingly
         onSnapshot(q, (snapshop) => {
             snapshop.docChanges().forEach((change) => {
                 if (change.type === "modified") {
@@ -197,17 +193,19 @@ const todoHandler = (() => {
         const date = document.getElementById("popup-date").value;
         const priority = document.getElementById("popup-priority").value;
         const projectIndex = document.getElementById("project-options").value;
+        const id = "todo-" + uniqid();
         const newTodo = {
             title: title,
             description: description,
             date: date,
             priority: priority,
             finished: false,
+            id: id,
         };
         if (projectIndex === "") {
             try {
-                const todoRef = await addDoc(collection(db, "todos"), newTodo);
-                return { id: todoRef.id, ...newTodo };
+                await setDoc(doc(db, "todos", id), newTodo);
+                return newTodo;
             } catch (error) {}
         } else {
             projectHandler.addTodoToProject(projectIndex, {
@@ -261,7 +259,6 @@ const todoHandler = (() => {
         editTodo,
         deleteTodo,
         getUpcoming,
-        // getTodoList,
     };
 })();
 
@@ -295,11 +292,13 @@ const displayHandler = (() => {
         checkBox.checked = inputTodo.finished ? true : false;
 
         const todoTitle = document.createElement("input");
+        todoTitle.readOnly = true;
         todoTitle.type = "text";
         todoTitle.placeholder = "Title";
         todoTitle.value = inputTodo.title;
 
         const calendar = document.createElement("input");
+        calendar.readOnly = true;
         calendar.type = "date";
         calendar.value = inputTodo.date;
 
@@ -366,19 +365,24 @@ const displayHandler = (() => {
                 const status = check.checked;
                 const todoRef = doc(db, "todos", inputTodo.id);
                 await updateDoc(todoRef, {
+                    id: inputTodo.id,
                     finished: status,
                 });
                 checkBoxes.forEach((otherCheckBoxes) => {
                     otherCheckBoxes.checked = status;
                 });
                 // Update todo listing in today-todo-table
-                const todayIndex = todoHandler.todayList
-                    .map(function (todo) {
-                        return todo.id;
-                    })
-                    .indexOf(inputTodo.id);
-                todoHandler.todayList[todayIndex].finished = status;
-                fillTodoTable("today-todo-table", todoHandler.todayList);
+                if (
+                    inputTodo.date.toString() === todoHandler.today.toString()
+                ) {
+                    const todayIndex = todoHandler.todayList
+                        .map(function (todo) {
+                            return todo.id;
+                        })
+                        .indexOf(inputTodo.id);
+                    todoHandler.todayList[todayIndex].finished = status;
+                    fillTodoTable("today-todo-table", todoHandler.todayList);
+                }
             });
         });
     }
@@ -472,7 +476,6 @@ const displayHandler = (() => {
                             return todo.id;
                         })
                         .indexOf(list[i].id);
-                    console.log(list);
                     todoHandler.todoList[index].finished = checkBox.checked;
                     const todoRef = doc(db, "todos", list[i].id);
                     await updateDoc(todoRef, {
@@ -555,6 +558,12 @@ const displayHandler = (() => {
         a.href = "#";
         a.textContent = inputProject.title;
 
+        const dueDate = document.createElement("input");
+        dueDate.readOnly = true;
+        dueDate.classList.add("project-due-date");
+        dueDate.type = "date";
+        dueDate.value = inputProject.dueDate;
+
         const deleteBtn = document.createElement("a");
         deleteBtn.classList.add("danger-text");
         deleteBtn.classList.add("delete-project-" + index);
@@ -566,9 +575,13 @@ const displayHandler = (() => {
         projectContainers.forEach((projectContainer) => {
             if (!projectContainer.classList.contains("project-tab")) {
                 projectDiv.classList.add("project-row");
+                if (projectContainer.classList.contains("all-projects-page")) {
+                    projectDiv.appendChild(dueDate);
+                }
                 projectDiv.appendChild(deleteBtn);
                 a.classList.add("accent-text");
             }
+
             projectContainer.appendChild(projectDiv.cloneNode(true));
         });
         const projectLinks = document.querySelectorAll(
@@ -718,9 +731,12 @@ const displayHandler = (() => {
         .addEventListener("click", async function () {
             const project = await projectHandler.createProject();
             projectHandler.projectList.push(project);
+            displayProject(project, projectHandler.projectList.length - 1);
             fillProjectDropdown();
             togglePopUp("close");
+            document.getElementById("project-popup-form").reset();
         });
+    // Listen for when changes are being to project values
     document
         .getElementById("project-title")
         .addEventListener("input", function () {
