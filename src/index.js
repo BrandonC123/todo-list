@@ -78,16 +78,20 @@ const projectHandler = (() => {
         const description = document.getElementById(
             "project-description"
         ).value;
+        const date = document.getElementById("project-due-date").value;
         if (title === "") {
             projectList[projectIndex].title = "Untitled Project";
         } else {
             projectList[projectIndex].title = title;
         }
         projectList[projectIndex].description = description;
+        projectList[projectIndex].dueDate = date;
+        console.log(projectList[projectIndex]);
         const projectRef = doc(db, "projects", projectList[projectIndex].id);
         await updateDoc(projectRef, {
             title: projectList[projectIndex].title,
             description: projectList[projectIndex].description,
+            dueDate: projectList[projectIndex].dueDate,
         });
         displayHandler.clearContainers();
     }
@@ -430,16 +434,29 @@ const displayHandler = (() => {
                 ".todo-checkbox-" + list[i].id
             );
             checkBox.addEventListener("change", async function () {
+                const status = checkBox.checked;
                 if (tableId === "todo-table") {
-                    list[i].finished = checkBox.checked;
+                    list[i].finished = status;
                     checkBoxes.forEach((check) => {
                         check.checked = list[i].finished;
+                    });
+                    const todoRef = doc(db, "todos", list[i].id);
+                    await updateDoc(todoRef, {
+                        finished: status,
                     });
                     fillTodoTable("today-todo-table", todoHandler.todayList);
                 }
                 if (tableId === "project-todo-table") {
                     projectHandler.projectList[projectIndex].todos[i].finished =
-                        checkBox.checked;
+                        status;
+                    const projectRef = doc(
+                        db,
+                        "projects",
+                        projectHandler.projectList[projectIndex].id
+                    );
+                    await updateDoc(projectRef, {
+                        todos: projectHandler.projectList[projectIndex].todos,
+                    });
                 }
                 if (tableId === "today-todo-table") {
                     const index = todoHandler.todoList
@@ -447,14 +464,16 @@ const displayHandler = (() => {
                             return todo.id;
                         })
                         .indexOf(list[i].id);
-                    todoHandler.todoList[index].finished = checkBox.checked;
+                    console.log(list);
+                    todoHandler.todoList[index].finished = status;
                     const todoRef = doc(db, "todos", list[i].id);
                     await updateDoc(todoRef, {
                         finished: checkBox.checked,
                     });
-                    checkBoxes.forEach((check) => {
-                        check.checked = list[i].finished;
+                    checkBoxes.forEach((otherCheckBoxes) => {
+                        otherCheckBoxes.checked = list[i].finished;
                     });
+                    fillTodoTable("todo-table", todoHandler.todoList);
                 }
                 row.classList.toggle("finished");
             });
@@ -591,6 +610,8 @@ const displayHandler = (() => {
             "project-description"
         );
         projectDescription.value = projectList[index].description;
+        const projectDueDate = document.getElementById("project-due-date");
+        projectDueDate.value = projectList[index].dueDate;
 
         const projectTodos = projectHandler.projectList[index].todos;
         fillTodoTable("project-todo-table", projectTodos, index);
@@ -698,6 +719,11 @@ const displayHandler = (() => {
         });
     document
         .getElementById("project-description")
+        .addEventListener("input", function () {
+            projectHandler.editProject(projectHandler.activeProjectIndex);
+        });
+    document
+        .getElementById("project-due-date")
         .addEventListener("input", function () {
             projectHandler.editProject(projectHandler.activeProjectIndex);
         });
