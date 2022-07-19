@@ -3,13 +3,15 @@ const { differenceInCalendarDays } = require("date-fns");
 const projectHandler = (() => {
     let projectList = [];
     let activeProjectIndex = -1;
+    let projectCount;
     try {
         projectList = JSON.parse(localStorage.getItem("project-list") || "[]");
+        projectCount =
+            projectList.length != 0
+                ? JSON.parse(projectList[projectList.length - 1].projectId)
+                : 0;
     } catch (e) {}
-    let projectCount =
-        projectList.length != 0
-            ? JSON.parse(projectList[projectList.length - 1].projectId)
-            : 0;
+
     function createProject() {
         const title =
             document.getElementById("project-popup-title").value === ""
