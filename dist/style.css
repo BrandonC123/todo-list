@@ -233,12 +233,18 @@ tr:nth-child(even) {
 .project-row {
     display: flex;
     justify-content: space-between;
-    max-width: 400px;
+    align-items: center;
+    gap: 5px;
+    max-width: 500px;
     background-color: white;
     border: 1px solid rgb(146, 146, 146);
     border-radius: 0.5em;
     padding: 0.2em;
     margin-top: 10px;
+}
+
+.project-due-date {
+    margin-left: auto;
 }
 
 .individual-project {
@@ -363,7 +369,7 @@ tr:nth-child(even) {
     }
     .action-btn,
     .secondary-btn {
-        font-size: .8rem;
+        font-size: 0.8rem;
     }
     .todo-divider {
         display: flex;
@@ -380,7 +386,7 @@ tr:nth-child(even) {
 @media (min-width: 1150px) {
     .action-btn,
     .secondary-btn {
-        font-size: .9rem;
+        font-size: 0.9rem;
     }
     table {
         font-size: 1rem;
